@@ -415,7 +415,7 @@ NAME=Java list classes DemoTest.class
 FILE=bins/java/DemoTest.class
 CMDS=ic
 EXPECT=<<EOF
-0x00000000 [0x00000190 - 0x00000236]    166 class 0 DemoTest :: java.lang.Object
+0x00000000 [0x00000190 - 0x00000236]    166 class 0 DemoTest :: java/lang/Object
 0x00000190 method 0      DemoTest.fun
 0x000001b9 method 1      DemoTest.<init>
 0x000001e8 method 2      DemoTest.res
@@ -428,7 +428,7 @@ NAME=Java list classes ExCaseTableSwitch.class
 FILE=bins/java/ExCaseTableSwitch.class
 CMDS=ic
 EXPECT=<<EOF
-0x00000000 [0x00000464 - 0x00000d74]   2320 class 0 CaseTableSwitch :: java.lang.Object
+0x00000000 [0x00000464 - 0x00000d74]   2320 class 0 CaseTableSwitch :: java/lang/Object
 0x00000464 method 0      CaseTableSwitch.<init>
 0x000004a1 method 1      CaseTableSwitch.a
 0x000005df method 2      CaseTableSwitch.a
@@ -454,7 +454,7 @@ NAME=Java list classes Hello.class
 FILE=bins/java/Hello.class
 CMDS=ic
 EXPECT=<<EOF
-0x00000000 [0x0000022b - 0x000002d3]    168 class 0 Hello :: java.lang.Object
+0x00000000 [0x0000022b - 0x000002d3]    168 class 0 Hello :: java/lang/Object
 0x0000022b method 0      Hello.<init>
 0x00000263 method 1      Hello.say
 0x000002aa method 2      Hello.main
@@ -466,7 +466,7 @@ NAME=Java list classes HiKt.class
 FILE=bins/java/HiKt.class
 CMDS=ic
 EXPECT=<<EOF
-0x00000000 [0x00000225 - 0x00000256]     49 class 0 HiKt :: java.lang.Object
+0x00000000 [0x00000225 - 0x00000256]     49 class 0 HiKt :: java/lang/Object
 0x00000225 method 0      HiKt.main
 EOF
 RUN
@@ -476,7 +476,7 @@ NAME=Java list classes invisible.class
 FILE=bins/java/invisible.class
 CMDS=ic
 EXPECT=<<EOF
-0x00000000 [0x00000000 - 0x00000000]      0 class 0 Test :: java.lang.Object
+0x00000000 [0x00000000 - 0x00000000]      0 class 0 Test :: java/lang/Object
 0xffffffffffffffff method 0      Test.main
 EOF
 RUN
@@ -486,7 +486,7 @@ NAME=Java list classes jdwpexeccmd.class
 FILE=bins/java/jdwpexeccmd.class
 CMDS=ic
 EXPECT=<<EOF
-0x00000000 [0x00000339 - 0x0000044d]    276 class 0 JDWPExecCmd :: java.lang.Object
+0x00000000 [0x00000339 - 0x0000044d]    276 class 0 JDWPExecCmd :: java/lang/Object
 0x00000339 method 0      JDWPExecCmd.<init>
 0x00000364 method 1      JDWPExecCmd.run
 EOF
@@ -497,7 +497,7 @@ NAME=Java list classes MainActivity.class
 FILE=bins/java/MainActivity.class
 CMDS=ic
 EXPECT=<<EOF
-0x00000000 [0x00001c87 - 0x000029ea]   3427 class 0 org.radare2.installer.MainActivity :: android.app.Activity
+0x00000000 [0x00001c87 - 0x000029ea]   3427 class 0 org/radare2/installer/MainActivity :: android/app/Activity
 0x00001c87 method 0      org.radare2.installer.MainActivity.<init>
 0x00001d06 method 1      org.radare2.installer.MainActivity.onCreate
 0x00001f02 method 2      org.radare2.installer.MainActivity.onCreateOptionsMenu
@@ -527,7 +527,7 @@ NAME=Java list classes Main.class
 FILE=bins/java/Main.class
 CMDS=ic
 EXPECT=<<EOF
-0x00000000 [0x00000389 - 0x00000482]    249 class 0 Main :: java.lang.Object
+0x00000000 [0x00000389 - 0x00000482]    249 class 0 Main :: java/lang/Object
 0x00000389 method 0      Main.<init>
 0x000003b4 method 1      Main.main
 EOF
@@ -546,7 +546,7 @@ NAME=Java list classes test.class
 FILE=bins/java/test.class
 CMDS=ic
 EXPECT=<<EOF
-0x00000000 [0x000008f9 - 0x00000bcd]    724 class 0 test :: groovy.lang.Script
+0x00000000 [0x000008f9 - 0x00000bcd]    724 class 0 test :: groovy/lang/Script
 0x000008f9 method 0      test.<init>
 0x0000092e method 1      test.<init>
 0x0000096e method 2      test.main
@@ -563,7 +563,7 @@ NAME=Java list classes TryWithResources.class
 FILE=bins/java/TryWithResources.class
 CMDS=ic
 EXPECT=<<EOF
-0x00000000 [0x00000421 - 0x00004f31]  19216 class 0 TryWithResources :: java.lang.RuntimeException
+0x00000000 [0x00000421 - 0x00004f31]  19216 class 0 TryWithResources :: java/lang/RuntimeException
 0x00000421 method 0      TryWithResources.$
 0x00000444 method 1      TryWithResources.<init>
 0x00000484 method 2      TryWithResources.close
