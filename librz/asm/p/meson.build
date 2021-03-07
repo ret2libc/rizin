@@ -1,98 +1,9 @@
-# To define a plugin add its name in `asm_plugins` and define:
-# - `asm_<pluginName>_sources`: an array of source files
-# - `asm_<pluginName>_headers`: an array of include directories (optional)
-# - `asm_<pluginName>_deps`: an array of meson dependencies
-
-asm_plugins = [
-  '6502',
-  '8051',
-  'amd29k',
-  'arc',
-  'arm_as',
-  'arm_cs',
-  'arm_gnu',
-  'arm_winedbg',
-  'avr',
-  'bf',
-  'chip8',
-  'cr16',
-  'cris_gnu',
-  'dalvik',
-  'dcpu16',
-  'ebc',
-  'gb',
-  'h8300',
-  'hexagon',
-  'hppa_gnu',
-  'i4004',
-  'i8080',
-  'java',
-  'lanai_gnu',
-  'lh5801',
-  'lm32',
-  'm68k_cs',
-  'm680x_cs',
-  'malbolge',
-  'mcore',
-  'mcs96',
-  'mips_cs',
-  'mips_gnu',
-  'msp430',
-  'nios2',
-  'or1k',
-  'pic',
-  'ppc_as',
-  'ppc_cs',
-  'ppc_gnu',
-  'propeller',
-  'pyc',
-  'riscv',
-  'rsp',
-  'sh',
-  'snes',
-  'sparc_cs',
-  'sparc_gnu',
-  'spc700',
-  'sysz',
-  'tms320',
-  'tms320c64x',
-  'tricore',
-  'v810',
-  'v850',
-  'vax',
-  'wasm',
-  'ws',
-  'x86_as',
-  'x86_cs',
-  'x86_nasm',
-  'x86_nz',
-  'xap',
-  'xcore_cs',
-  'xtensa',
-  'z80',
-]
-
-asm_enabled_static_plugins = asm_plugins
-asm_enabled_shared_plugins = []
-
-rz_asm_dependencies = [
-  rz_util_dep,
-  rz_syscall_dep,
-  rz_flag_dep,
-  rz_parse_dep,
-  rz_bin_dep,
-]
-
 asm_6502_sources = [
   'p/asm_6502.c',
 ]
 
 asm_6502_cs_sources = [
   'p/asm_6502_cs.c',
-]
-
-asm_6502_cs_deps = [
-  capstone_dep,
 ]
 
 asm_8051_sources = [
@@ -123,12 +34,6 @@ asm_arm_as_sources = [
 
 asm_arm_cs_sources = [
   'p/asm_arm_cs.c',
-  'arch/arm/armass.c',
-  'arch/arm/armass64.c',
-]
-
-asm_arm_cs_deps = [
-  capstone_dep,
 ]
 
 asm_arm_gnu_sources = [
@@ -141,10 +46,6 @@ asm_arm_gnu_sources = [
   'arch/arm/armass64.c',
   'arch/arm/gnu/arm-dis.c',
   'arch/arm/gnu/floatformat.c',
-]
-
-asm_arm_gnu_headers = [
-  'arch/arm/',
 ]
 
 asm_arm_winedbg_sources = [
@@ -239,8 +140,6 @@ asm_java_sources = [
   'p/asm_java.c',
   'arch/java/code.c',
   'arch/java/ops.c',
-  '../bin/format/java/class.c',
-  '../bin/format/java/print.c',
 ]
 
 asm_lanai_gnu_sources = [
@@ -261,16 +160,8 @@ asm_m68k_cs_sources = [
   'p/asm_m68k_cs.c',
 ]
 
-asm_m68k_cs_deps = [
-  capstone_dep,
-]
-
 asm_m680x_cs_sources = [
   'p/asm_m680x_cs.c',
-]
-
-asm_m680x_cs_deps = [
-  capstone_dep,
 ]
 
 asm_malbolge_sources = [
@@ -283,11 +174,6 @@ asm_mcs96_sources = [
 
 asm_mips_cs_sources = [
   'p/asm_mips_cs.c',
-  'arch/mips/mipsasm.c',
-]
-
-asm_mips_cs_deps = [
-  capstone_dep,
 ]
 
 asm_mips_gnu_sources = [
@@ -344,12 +230,6 @@ asm_ppc_as_sources = [
 
 asm_ppc_cs_sources = [
   'p/asm_ppc_cs.c',
-  'arch/ppc/libvle/vle.c',
-  'arch/ppc/libps/libps.c',
-]
-
-asm_ppc_cs_deps = [
-  capstone_dep,
 ]
 
 asm_ppc_gnu_sources = [
@@ -430,10 +310,6 @@ asm_sparc_cs_sources = [
   'p/asm_sparc_cs.c',
 ]
 
-asm_sparc_cs_deps = [
-  capstone_dep,
-]
-
 asm_sparc_gnu_sources = [
   'p/asm_sparc_gnu.c',
   'arch/sparc/gnu/sparc-dis.c',
@@ -448,10 +324,6 @@ asm_sysz_sources = [
   'p/asm_sysz.c',
 ]
 
-asm_sysz_deps = [
-  capstone_dep,
-]
-
 asm_tms320_sources = [
   'p/asm_tms320.c',
   'arch/tms320/c55x_plus/c55plus.c',
@@ -463,16 +335,8 @@ asm_tms320_sources = [
   'arch/tms320/tms320_dasm.c',
 ]
 
-asm_tms320_deps = [
-  capstone_dep,
-]
-
 asm_tms320c64x_sources = [
   'p/asm_tms320c64x.c',
-]
-
-asm_tms320c64x_deps = [
-  capstone_dep,
 ]
 
 asm_tricore_sources = [
@@ -523,10 +387,6 @@ asm_x86_cs_sources = [
   'p/asm_x86_cs.c',
 ]
 
-asm_x86_cs_deps = [
-  capstone_dep,
-]
-
 asm_x86_nasm_sources = [
   'p/asm_x86_nasm.c',
 ]
@@ -543,10 +403,6 @@ asm_xcore_cs_sources = [
   'p/asm_xcore_cs.c',
 ]
 
-asm_xcore_cs_deps = [
-  capstone_dep,
-]
-
 asm_xtensa_sources = [
   'p/asm_xtensa.c',
   'arch/xtensa/gnu/elf32-xtensa.c',
@@ -560,90 +416,18 @@ asm_z80_sources = [
   'arch/z80/z80.c',
 ]
 
-# compile static plugins
-rz_asm_plugins_dep = []
 foreach p : asm_plugins
   c_files = get_variable('asm_@0@_sources'.format(p))
   h_files = get_variable('asm_@0@_headers'.format(p), [])
-  asm_plugin_deps = get_variable('asm_@0@_deps'.format(p), [])
+  h_files += ['../arch', '../arch/include']
+  asm_plugin = library('asm_plugin_@0@'.format(p), c_files,
+    include_directories: include_directories(h_files, platform_inc),
+    cflags: library_cflags,
+    static: true,
+    install: false,
+  )
 
-  h_files += ['arch', 'arch/include']
-  h_files = include_directories(h_files)
-  name = 'asm_plugin_@0@'.format(p)
-  asm_plugin_inc = [h_files, platform_inc]
-
-  if p in asm_enabled_static_plugins
-    asm_plugin = static_library(name, c_files,
-      include_directories: asm_plugin_inc,
-      dependencies: rz_asm_dependencies + asm_plugin_deps,
-      c_args: library_cflags,
-      install: false,
-    )
-
-    asm_plugin_dep = declare_dependency(link_with: asm_plugin, include_directories: asm_plugin_inc)
-    set_variable(name + '_dep', asm_plugin_dep)
-    rz_asm_plugins_dep += [asm_plugin_dep]
-  endif
-endforeach
-
-rz_asm_sources = [
-  'asm.c',
-  'aop.c',
-  'acode.c',
-  'binutils_as.c',
-]
-
-rz_asm_inc = [
-  platform_inc,
-]
-
-rz_asm = library('rz_asm', rz_asm_sources,
-  include_directories: rz_asm_inc,
-  c_args: library_cflags,
-  dependencies: rz_asm_dependencies + rz_asm_plugins_dep,
-  install: true,
-  implicit_include_directories: false,
-  install_rpath: rpath_lib,
-  soversion: rizin_libversion
-)
-
-rz_asm_dep = declare_dependency(link_with: rz_asm,
-                               include_directories: rz_asm_inc)
-
-pkgconfig_mod.generate(rz_asm,
-  subdirs: 'librz',
-  version: rizin_version,
-  name: 'rz_asm',
-  filebase: 'rz_asm',
-  libraries: pkgcfg_sanitize_libs,
-  requires: [
-    'rz_util',
-    'rz_syscall',
-    'rz_parse',
-    'rz_flag',
-    'rz_bin',
-    'rz_socket'
-  ],
-  description: 'rizin foundation libraries'
-)
-
-# compile shared plugins
-foreach p : asm_plugins
-  c_files = get_variable('asm_@0@_sources'.format(p))
-  h_files = get_variable('asm_@0@_headers'.format(p), [])
-  asm_plugin_deps = get_variable('asm_@0@_deps'.format(p), [])
-
-  h_files += ['arch', 'arch/include']
-  h_files = include_directories(h_files)
-  name = 'asm_plugin_@0@'.format(p)
-  asm_plugin_inc = [h_files, platform_inc]
-
-  if p in asm_enabled_shared_plugins
-    asm_plugin = shared_library(name, c_files,
-      include_directories: asm_plugin_inc,
-      dependencies: [rz_asm_dependencies, rz_asm_dep, asm_plugin_deps],
-      install: true,
-      install_dir: rizin_plugins,
-    )
-  endif
+  asm_plugin_dep = declare_dependency(link_with: asm_plugin, include_directories: h_files + platform_inc)
+  set_variable('asm_plugin_@0@_dep', asm_plugin_dep)
+  rz_asm_static_plugins += [asm_plugin_dep]
 endforeach

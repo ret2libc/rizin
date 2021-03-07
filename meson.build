@@ -542,10 +542,16 @@ if cli_enabled
   subdir('binrz/rz-test')
 endif
 
+asm_enabled_static_plugins_str = []
+foreach p : asm_enabled_static_plugins
+  asm_enabled_static_plugins_str += ['&rz_asm_plugin_' + p]
+endforeach
+asm_enabled_static_plugins_str += ['0']
+
 conf_data = configuration_data()
 conf_data.set('plugins_core', '&rz_core_plugin_' + ', &rz_core_plugin_'.join(core_plugins) + ', 0')
 conf_data.set('plugins_analysis', '&rz_analysis_plugin_' + ', &rz_analysis_plugin_'.join(analysis_plugins) + ', 0')
-conf_data.set('plugins_asm', '&rz_asm_plugin_' + ', &rz_asm_plugin_'.join(asm_plugins) + ', 0')
+conf_data.set('plugins_asm', ', '.join(asm_enabled_static_plugins_str))
 conf_data.set('plugins_bp', '&rz_bp_plugin_' + ', &rz_bp_plugin_'.join(bp_plugins) + ', 0')
 conf_data.set('plugins_bin', '&rz_bin_plugin_' + ', &rz_bin_plugin_'.join(bin_plugins) + ', 0')
 conf_data.set('plugins_bin_ldr', '&rz_bin_ldr_plugin_' + ', &rz_bin_ldr_plugin_'.join(bin_ldr_plugins) + ', 0')
