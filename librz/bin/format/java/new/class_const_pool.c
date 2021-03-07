@@ -77,6 +77,52 @@ void java_constant_pool_free(ConstPool *cpool) {
 	free(cpool);
 }
 
+const char* java_constant_pool_tag_name(const ConstPool *cpool) {
+	rz_return_val_if_fail(cpool, NULL);
+	switch(cpool->tag) {
+	case CONSTANT_POOL_ZERO:
+		return "Zero"; 
+	case CONSTANT_POOL_UTF8:
+		return "Utf8"; 
+	case CONSTANT_POOL_UNICODE:
+		return "Unicode"; 
+	case CONSTANT_POOL_INTEGER:
+		return "Integer"; 
+	case CONSTANT_POOL_FLOAT:
+		return "Float"; 
+	case CONSTANT_POOL_LONG:
+		return "Long"; 
+	case CONSTANT_POOL_DOUBLE:
+		return "Double"; 
+	case CONSTANT_POOL_CLASS:
+		return "Class"; 
+	case CONSTANT_POOL_STRING:
+		return "String"; 
+	case CONSTANT_POOL_FIELDREF:
+		return "Fieldref"; 
+	case CONSTANT_POOL_METHODREF:
+		return "Methodref"; 
+	case CONSTANT_POOL_INTERFACEMETHODREF:
+		return "InterfaceMethodref"; 
+	case CONSTANT_POOL_NAMEANDTYPE:
+		return "NameAndType"; 
+	case CONSTANT_POOL_METHODHANDLE:
+		return "MethodHandle"; 
+	case CONSTANT_POOL_METHODTYPE:
+		return "MethodType"; 
+	case CONSTANT_POOL_DYNAMIC:
+		return "Dynamic"; 
+	case CONSTANT_POOL_INVOKEDYNAMIC:
+		return "InvokeDynamic"; 
+	case CONSTANT_POOL_MODULE:
+		return "Module"; 
+	case CONSTANT_POOL_PACKAGE:
+		return "Package";
+	default:
+		return NULL;
+	}
+}
+
 bool java_constant_pool_is_string(const ConstPool *cpool) {
 	rz_return_val_if_fail(cpool, false);
 	return cpool->tag == CONSTANT_POOL_UTF8 || cpool->tag == CONSTANT_POOL_UNICODE;
@@ -102,13 +148,10 @@ char *java_constant_pool_stringify(const ConstPool *cpool) {
 	switch (cpool->tag) {
 	case CONSTANT_POOL_UTF8:
 	case CONSTANT_POOL_UNICODE: {
-		char *copy = malloc(cpool->size + 1);
-		if (!copy) {
+		if (!cpool->size) {
 			return NULL;
 		}
-		memcpy(copy, cpool->buffer, cpool->size);
-		copy[cpool->size] = 0;
-		return copy;
+		return rz_str_encoded_json(cpool->buffer, cpool->size, 0);
 	}
 	case CONSTANT_POOL_LONG: {
 		st64 value = rz_read_be64(cpool->buffer);

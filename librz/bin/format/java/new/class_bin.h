@@ -69,14 +69,24 @@ RZ_API char *rz_bin_java_class_name(RzBinJavaClass *bin);
 RZ_API char *rz_bin_java_class_super(RzBinJavaClass *bin);
 RZ_API ut32 rz_bin_java_class_access_flags(RzBinJavaClass *bin);
 RZ_API char *rz_bin_java_class_access_flags_readable(RzBinJavaClass *bin);
+RZ_API void rz_bin_java_class_as_json(RzBinJavaClass *bin, PJ *j);
+RZ_API void rz_bin_java_class_as_text(RzBinJavaClass *bin, RzStrBuf *sb);
 
-/* used in bin_java.c */
+/* used in bin_java.c and core_java.c */
 RZ_API RzList *rz_bin_java_class_methods_as_symbols(RzBinJavaClass *bin);
+RZ_API void rz_bin_java_class_methods_as_text(RzBinJavaClass *bin, RzStrBuf *sb);
+RZ_API void rz_bin_java_class_methods_as_json(RzBinJavaClass *bin, PJ *j);
 RZ_API RzList *rz_bin_java_class_fields_as_symbols(RzBinJavaClass *bin);
 RZ_API RzList *rz_bin_java_class_fields_as_binfields(RzBinJavaClass *bin);
+RZ_API void rz_bin_java_class_fields_as_text(RzBinJavaClass *bin, RzStrBuf *sb);
+RZ_API void rz_bin_java_class_fields_as_json(RzBinJavaClass *bin, PJ *j);
 RZ_API RzList *rz_bin_java_class_const_pool_as_symbols(RzBinJavaClass *bin);
 RZ_API RzList *rz_bin_java_class_const_pool_as_imports(RzBinJavaClass *bin);
+RZ_API void rz_bin_java_class_const_pool_as_text(RzBinJavaClass *bin, RzStrBuf *sb);
+RZ_API void rz_bin_java_class_const_pool_as_json(RzBinJavaClass *bin, PJ *j);
 RZ_API RzList *rz_bin_java_class_as_sections(RzBinJavaClass *bin);
 RZ_API RzList *rz_bin_java_class_as_libraries(RzBinJavaClass *bin);
+RZ_API void rz_bin_java_class_interfaces_as_text(RzBinJavaClass *bin, RzStrBuf *sb);
+RZ_API void rz_bin_java_class_interfaces_as_json(RzBinJavaClass *bin, PJ *j);
 
 #endif /* RZ_BIN_JAVA_CLASS_H */

@@ -247,7 +247,7 @@ RZ_API char *rz_bin_java_class_version(RzBinJavaClass *bin) {
 		return strdup("Java SE 16"); // Java SE 16
 	}
 #undef is_version
-	return rz_str_newf("jdk unknown (%u, %u)", bin->major_version, bin->minor_version);
+	return strdup("unknown");
 }
 
 RZ_API ut64 rz_bin_java_class_debug_info(RzBinJavaClass *bin) {
@@ -390,6 +390,126 @@ RZ_API char *rz_bin_java_class_access_flags_readable(RzBinJavaClass *bin) {
 	return rz_strbuf_drain(sb);
 }
 
+static int calculate_padding_ut16(ut16 count) {
+	if (count > 9999) {
+		return 5;
+	} else if (count > 999) {
+		return 4;
+	} else if (count > 99) {
+		return 3;
+	}
+	return 2;
+}
+
+RZ_API void rz_bin_java_class_as_json(RzBinJavaClass *bin, PJ *j) {
+	rz_return_if_fail(bin && j);
+	char *tmp = NULL;
+
+	pj_o(j);
+
+	pj_ko(j, "version");
+	{
+		pj_kn(j, "minor", bin->minor_version);
+		pj_kn(j, "major", bin->major_version);
+		tmp = rz_bin_java_class_version(bin);
+		pj_ks(j, "version", tmp ? tmp : "");
+		free(tmp);
+	}
+	pj_end(j);
+
+	pj_kn(j, "constant_pool_count", bin->constant_pool_count);
+	pj_k(j, "constant_pool");
+	rz_bin_java_class_const_pool_as_json(bin, j);
+
+	pj_kn(j, "access_flags_n", bin->access_flags);
+	tmp = rz_bin_java_class_access_flags_readable(bin);
+	pj_ks(j, "access_flags_s", tmp ? tmp : "");
+	free(tmp);
+
+	pj_kn(j, "class_n", bin->this_class);
+	tmp = rz_bin_java_class_name(bin);
+	pj_ks(j, "class_s", tmp ? tmp : "");
+	free(tmp);
+
+	pj_kn(j, "super_n", bin->super_class);
+	tmp = rz_bin_java_class_super(bin);
+	pj_ks(j, "super_s", tmp ? tmp : "");
+	free(tmp);
+
+	pj_kn(j, "interfaces_count", bin->interfaces_count);
+	pj_k(j, "interfaces");
+	rz_bin_java_class_interfaces_as_json(bin, j);
+
+	pj_kn(j, "methods_count", bin->methods_count);
+	pj_k(j, "methods");
+	rz_bin_java_class_methods_as_json(bin, j);
+
+	pj_kn(j, "fields_count", bin->fields_count);
+	pj_k(j, "fields");
+	rz_bin_java_class_fields_as_json(bin, j);
+
+
+	pj_kn(j, "attributes_count", bin->attributes_count);
+	pj_ka(j, "attributes");
+	for (ut32 i = 0; i < bin->attributes_count; ++i) {
+		Attribute *attr = bin->attributes[i];
+		if (!attr) {
+			continue;
+		}
+		pj_o(j);
+		pj_kn(j, "offset", attr->offset);
+		pj_kn(j, "size", attr->attribute_length);
+		pj_kn(j, "name_n", attr->attribute_name_index);
+		tmp = java_class_constant_pool_stringify_at(bin, attr->attribute_name_index);
+		pj_ks(j, "name_s", tmp ? tmp : "");
+		free(tmp);
+		pj_end(j);
+	}
+	pj_end(j);
+	pj_end(j);
+}
+
+RZ_API void rz_bin_java_class_as_text(RzBinJavaClass *bin, RzStrBuf *sb) {
+	rz_return_if_fail(bin && sb);
+	char number[16];
+	char *tmp = NULL;
+	int padding;
+
+	tmp = rz_bin_java_class_version(bin);
+	rz_strbuf_appendf(sb, "Version: (%u.%u) %s\n", bin->major_version, bin->minor_version, tmp);
+	free(tmp);
+
+	tmp = rz_bin_java_class_access_flags_readable(bin);
+	rz_strbuf_appendf(sb, "Flags: (0x%04x) %s\n", bin->access_flags, tmp);
+	free(tmp);
+
+	tmp = rz_bin_java_class_name(bin);
+	rz_strbuf_appendf(sb, "Class: (#%u) %s\n", bin->this_class, tmp);
+	free(tmp);
+
+	tmp = rz_bin_java_class_super(bin);
+	rz_strbuf_appendf(sb, "Super: (#%u) %s\n", bin->super_class, tmp);
+	free(tmp);
+
+	rz_bin_java_class_const_pool_as_text(bin, sb);
+	rz_bin_java_class_interfaces_as_text(bin, sb);
+	rz_bin_java_class_methods_as_text(bin, sb);
+	rz_bin_java_class_fields_as_text(bin, sb);
+
+	rz_strbuf_appendf(sb, "Attributes: %u\n", bin->attributes_count);
+	padding = calculate_padding_ut16(bin->attributes_count) + 1;
+	for (ut32 i = 0; i < bin->attributes_count; ++i) {
+		Attribute *attr = bin->attributes[i];
+		if (!attr) {
+			continue;
+		}
+		snprintf(number, sizeof(number), "#%u", i);
+		tmp = java_class_constant_pool_stringify_at(bin, attr->attribute_name_index);
+		rz_strbuf_appendf(sb, "  %-*s = #%-5u size: %-5u %s\n", padding, number, attr->attribute_name_index, attr->attribute_length, tmp);
+		free(tmp);
+	}
+}
+
 static char* add_class_name_to_name(char* name, char* classname) {
 	char* tmp;
 	if (classname && name) {
@@ -458,6 +578,102 @@ RZ_API RzList *rz_bin_java_class_methods_as_symbols(RzBinJavaClass *bin) {
 		}
 	}
 	return list;
+}
+
+RZ_API void rz_bin_java_class_methods_as_text(RzBinJavaClass *bin, RzStrBuf *sb) {
+	rz_return_if_fail(bin && sb);
+
+	rz_strbuf_appendf(sb, "Methods: %u\n", bin->methods_count);
+	char number[16];
+	char *flags, *name, *descr;
+	if (bin->methods) {
+		for (ut32 i = 0; i < bin->methods_count; ++i) {
+			const Method *method = bin->methods[i];
+			if (!method) {
+				rz_warn_if_reached();
+				continue;
+			}
+			flags = java_method_access_flags_readable(method);
+			name = java_class_constant_pool_stringify_at(bin, method->name_index);
+			descr = java_class_constant_pool_stringify_at(bin, method->descriptor_index);
+
+			rz_strbuf_appendf(sb, "  %s %s%s;\n", flags, name, descr);
+			rz_strbuf_appendf(sb, "    name: %s\n", name);
+			rz_strbuf_appendf(sb, "    descriptor: %s\n", descr);
+			rz_strbuf_appendf(sb, "    flags: (0x%04x) %s\n", method->access_flags, flags);
+
+			free(flags);
+			free(name);
+			free(descr);
+			rz_strbuf_appendf(sb, "    attributes: %u\n", method->attributes_count);
+			int padding = calculate_padding_ut16(method->attributes_count) + 1;
+			for (ut32 i = 0; i < method->attributes_count; ++i) {
+				Attribute *attr = method->attributes[i];
+				if (!attr) {
+					continue;
+				}
+				snprintf(number, sizeof(number), "#%u", i);
+				name = java_class_constant_pool_stringify_at(bin, attr->attribute_name_index);
+				rz_strbuf_appendf(sb, "    %-*s = #%-5u size: %-5u %s\n", padding, number, attr->attribute_name_index, attr->attribute_length, name);
+				free(name);
+			}
+		}
+	}
+}
+
+RZ_API void rz_bin_java_class_methods_as_json(RzBinJavaClass *bin, PJ *j) {
+	rz_return_if_fail(bin && j);
+
+	pj_a(j);
+
+	char *tmp;
+	if (bin->methods) {
+		for (ut32 i = 0; i < bin->methods_count; ++i) {
+			const Method *method = bin->methods[i];
+			if (!method) {
+				rz_warn_if_reached();
+				continue;
+			}
+			pj_o(j); // {
+			pj_kn(j, "offset", method->offset);
+
+			pj_kn(j, "access_flags_n", method->access_flags);
+			tmp = java_method_access_flags_readable(method);
+			pj_ks(j, "access_flags_s", tmp ? tmp : "");
+			free(tmp);
+
+			pj_kn(j, "name_n", method->name_index);
+			tmp = java_class_constant_pool_stringify_at(bin, method->name_index);
+			pj_ks(j, "name_s", tmp ? tmp : "");
+			free(tmp);
+
+			pj_kn(j, "descriptor_n", method->descriptor_index);
+			tmp = java_class_constant_pool_stringify_at(bin, method->descriptor_index);
+			pj_ks(j, "descriptor_s", tmp ? tmp : "");
+			free(tmp);
+
+			pj_kn(j, "attributes_count", method->attributes_count);
+			pj_ka(j, "attributes"); // [
+			for (ut32 i = 0; i < method->attributes_count; ++i) {
+				Attribute *attr = method->attributes[i];
+				if (!attr) {
+					rz_warn_if_reached();
+					continue;
+				}
+				pj_o(j);
+				pj_kn(j, "offset", attr->offset);
+				pj_kn(j, "size", attr->attribute_length);
+				pj_kn(j, "name_n", attr->attribute_name_index);
+				tmp = java_class_constant_pool_stringify_at(bin, attr->attribute_name_index);
+				pj_ks(j, "name_s", tmp ? tmp : "");
+				free(tmp);
+				pj_end(j);
+			}
+			pj_end(j); // ]
+			pj_end(j); // }
+		}
+	}
+	pj_end(j);
 }
 
 RZ_API RzList *rz_bin_java_class_fields_as_symbols(RzBinJavaClass *bin) {
@@ -540,6 +756,102 @@ RZ_API RzList *rz_bin_java_class_fields_as_binfields(RzBinJavaClass *bin) {
 		}
 	}
 	return list;
+}
+
+RZ_API void rz_bin_java_class_fields_as_text(RzBinJavaClass *bin, RzStrBuf *sb) {
+	rz_return_if_fail(bin && sb);
+
+	rz_strbuf_appendf(sb, "Fields: %u\n", bin->fields_count);
+	char number[16];
+	char *flags, *name, *descr;
+	if (bin->fields) {
+		for (ut32 i = 0; i < bin->fields_count; ++i) {
+			const Field *field = bin->fields[i];
+			if (!field) {
+				rz_warn_if_reached();
+				continue;
+			}
+			flags = java_field_access_flags_readable(field);
+			name = java_class_constant_pool_stringify_at(bin, field->name_index);
+			descr = java_class_constant_pool_stringify_at(bin, field->descriptor_index);
+
+			rz_strbuf_appendf(sb, "  %s %s %s;\n", flags, descr, name);
+			rz_strbuf_appendf(sb, "    name: %s\n", name);
+			rz_strbuf_appendf(sb, "    descriptor: %s\n", descr);
+			rz_strbuf_appendf(sb, "    flags: (0x%04x) %s\n", field->access_flags, flags);
+
+			free(flags);
+			free(name);
+			free(descr);
+			rz_strbuf_appendf(sb, "    attributes: %u\n", field->attributes_count);
+			int padding = calculate_padding_ut16(field->attributes_count) + 1;
+			for (ut32 i = 0; i < field->attributes_count; ++i) {
+				Attribute *attr = field->attributes[i];
+				if (!attr) {
+					continue;
+				}
+				snprintf(number, sizeof(number), "#%u", i);
+				name = java_class_constant_pool_stringify_at(bin, attr->attribute_name_index);
+				rz_strbuf_appendf(sb, "    %*s = #%-5u size: %-5u %s\n", padding, number, attr->attribute_name_index, attr->attribute_length, name);
+				free(name);
+			}
+		}
+	}
+}
+
+RZ_API void rz_bin_java_class_fields_as_json(RzBinJavaClass *bin, PJ *j) {
+	rz_return_if_fail(bin && j);
+
+	pj_a(j);
+
+	char *tmp;
+	if (bin->fields) {
+		for (ut32 i = 0; i < bin->fields_count; ++i) {
+			const Field *field = bin->fields[i];
+			if (!field) {
+				rz_warn_if_reached();
+				continue;
+			}
+			pj_o(j); // {
+
+			pj_kn(j, "offset", field->offset);
+
+			pj_kn(j, "access_flags_n", field->access_flags);
+			tmp = java_field_access_flags_readable(field);
+			pj_ks(j, "access_flags_s", tmp ? tmp : "");
+			free(tmp);
+
+			pj_kn(j, "name_n", field->name_index);
+			tmp = java_class_constant_pool_stringify_at(bin, field->name_index);
+			pj_ks(j, "name_s", tmp ? tmp : "");
+			free(tmp);
+
+			pj_kn(j, "descriptor_n", field->descriptor_index);
+			tmp = java_class_constant_pool_stringify_at(bin, field->descriptor_index);
+			pj_ks(j, "descriptor_s", tmp ? tmp : "");
+			free(tmp);
+
+			pj_kn(j, "attributes_count", field->attributes_count);
+			pj_ka(j, "attributes"); // [
+			for (ut32 i = 0; i < field->attributes_count; ++i) {
+				Attribute *attr = field->attributes[i];
+				if (!attr) {
+					continue;
+				}
+				pj_o(j);
+				pj_kn(j, "offset", attr->offset);
+				pj_kn(j, "size", attr->attribute_length);
+				pj_kn(j, "name_n", attr->attribute_name_index);
+				tmp = java_class_constant_pool_stringify_at(bin, attr->attribute_name_index);
+				pj_ks(j, "name_s", tmp ? tmp : "");
+				free(tmp);
+				pj_end(j);
+			}
+			pj_end(j); // ]
+			pj_end(j); // }
+		}
+	}
+	pj_end(j);
 }
 
 static char* import_type(const ConstPool* cpool) {
@@ -657,6 +969,62 @@ RZ_API RzList *rz_bin_java_class_const_pool_as_imports(RzBinJavaClass *bin) {
 	}
 
 	return imports;
+}
+
+RZ_API void rz_bin_java_class_const_pool_as_text(RzBinJavaClass *bin, RzStrBuf *sb) {
+	rz_return_if_fail(bin && sb);
+
+	char number[16];
+	const char *tag;
+	char *text;
+	rz_strbuf_appendf(sb, "Constant pool: %u\n", bin->constant_pool_count);
+	if (bin->constant_pool) {
+		int padding = calculate_padding_ut16(bin->constant_pool_count) + 1;
+		for (ut32 i = 0; i < bin->constant_pool_count; ++i) {
+			const ConstPool* cpool = bin->constant_pool[i];
+			if (!cpool) {
+				continue;
+			}
+			tag = java_constant_pool_tag_name(cpool);
+			if (!tag) {
+				rz_warn_if_reached();
+				continue;
+			}
+			snprintf(number, sizeof(number), "#%u", i);
+			text = java_constant_pool_stringify(cpool);
+			rz_strbuf_appendf(sb, "  %*s = %-19s %s\n", padding, number, tag, text);
+			free(text);
+		}
+	}
+}
+
+RZ_API void rz_bin_java_class_const_pool_as_json(RzBinJavaClass *bin, PJ *j) {
+	rz_return_if_fail(bin && j);
+	const char *tag;
+	char *text;
+	pj_a(j);
+	if (bin->constant_pool) {
+		for (ut32 i = 0; i < bin->constant_pool_count; ++i) {
+			const ConstPool* cpool = bin->constant_pool[i];
+			if (!cpool) {
+				continue;
+			}
+			tag = java_constant_pool_tag_name(cpool);
+			if (!tag) {
+				rz_warn_if_reached();
+				continue;
+			}
+			text = java_constant_pool_stringify(cpool);
+			pj_o(j);
+			pj_kn(j, "index", i);
+			pj_kn(j, "tag_n", cpool->tag);
+			pj_ks(j, "tag_s", tag);
+			pj_ks(j, "value", text ? text : "");
+			pj_end(j);
+			free(text);
+		}
+	}
+	pj_end(j);
 }
 
 static RzBinSection *new_section(const char* name, ut64 start, ut64 end, ut32 perm) {
@@ -842,3 +1210,41 @@ RZ_API RzList *rz_bin_java_class_as_libraries(RzBinJavaClass *bin) {
 	return list;
 }
 
+RZ_API void rz_bin_java_class_interfaces_as_text(RzBinJavaClass *bin, RzStrBuf *sb) {
+	rz_return_if_fail(bin && sb);
+
+	ut16 index;
+	char number[16];
+	char *tmp = NULL;
+	rz_strbuf_appendf(sb, "Interfaces: %u\n", bin->interfaces_count);
+	if (bin->interfaces) {
+		int padding = calculate_padding_ut16(bin->constant_pool_count) + 1;
+		for (ut32 i = 0; i < bin->interfaces_count; ++i) {
+			snprintf(number, sizeof(number), "#%u", i);
+
+			index = bin->interfaces[i]->index;
+			tmp = java_class_constant_pool_stringify_at(bin, index);
+			rz_strbuf_appendf(sb, "  %*s = #%5u %s\n", padding, number, index, tmp);
+			free(tmp);
+		}
+	}
+}
+
+RZ_API void rz_bin_java_class_interfaces_as_json(RzBinJavaClass *bin, PJ *j) {
+	rz_return_if_fail(bin && j);
+	pj_a(j);
+	char *tmp = NULL;
+	if (bin->interfaces) {
+		for (ut32 i = 0; i < bin->interfaces_count; ++i) {
+			pj_o(j);
+			pj_kn(j, "offset", bin->interfaces[i]->offset);
+			ut16 index = bin->interfaces[i]->index;
+			pj_kn(j, "name_n", index);
+			tmp = java_class_constant_pool_stringify_at(bin, index);
+			pj_ks(j, "name_s", tmp ? tmp : "");
+			free(tmp);
+			pj_end(j);
+		}
+	}
+	pj_end(j);
+}

@@ -11,56 +11,246 @@
 
 #include "../format/java/new/class_bin.h"
 
-//typedef bool (*RzJavaCommand)(RzCmd *cmd, const RzCmdDesc *desc, void *user);
-//
-//static const RzJavaCommand command_line[] = {
-//};
+
+#define name_args(name) (cmd_ ## name ## _args)
+#define name_help(name) (cmd_ ## name ## _help)
+#define name_handler(name) (rz_cmd_ ## name ## _handler)
+#define static_description_without_args(command,summ) \
+	static const RzCmdDescArg name_args(command)[] = { \
+		{ 0 }, \
+	}; \
+	static const RzCmdDescHelp name_help(command) = { \
+		.summary = summ, \
+		.args = name_args(command), \
+	}
+#define rz_cmd_desc_argv_modes_new_warn(rcmd,root,cmd,flags) \
+	rz_warn_if_fail(rz_cmd_desc_argv_modes_new(rcmd,root,#cmd,flags,name_handler(cmd),&name_help(cmd)))
+
+static RzBinJavaClass *core_java_get_class(RzCore *core) {
+	if (!core) {
+		return NULL;
+	}
+	RzAnalysis *analysis = core->analysis;
+	if (!analysis || !analysis->binb.bin) {
+		return NULL;
+	}
+	RzBin *b = analysis->binb.bin;
+	if (!b->cur || !b->cur->o) {
+		return NULL;
+	}
+	RzBinPlugin *plugin = b->cur->o->plugin;
+	return plugin && !strcmp(plugin->name, "java") ? (RzBinJavaClass *)b->cur->o->bin_obj : NULL;
+}
 
 RZ_IPI RzCmdStatus rz_cmd_java_handler(RzCore *core, int argc, const char **argv) {
-	if (argc < 2) {
-		return RZ_CMD_STATUS_WRONG_ARGS;
-	}
-	//for (int i = 0; i < END_CMDS; i++) {
-	//	if (!strncmp(argv[1], JAVA_CMDS[i].name, JAVA_CMDS[i].name_len)) {
-	//		return JAVA_CMDS[i].handler(core, argc - 2, argc > 2 ? &argv[2] : NULL);
-	//	}
-	//}
 	return RZ_CMD_STATUS_WRONG_ARGS;
 }
 
-static const char *cmd_java_subcmd_choices[] = { "help", "constants", NULL };
-static const RzCmdDescArg cmd_java_args[3] = {
-	{
-		.name = "subcmd",
-		.type = RZ_CMD_ARG_TYPE_CHOICES,
-		.default_value = "help",
-		.choices = cmd_java_subcmd_choices,
-	},
-	{
-		.name = "arg",
-		.type = RZ_CMD_ARG_TYPE_STRING,
-		.flags = RZ_CMD_ARG_FLAG_ARRAY,
-		.optional = true,
-	},
+RZ_IPI RzCmdStatus rz_cmd_javac_handler(RzCore *core, int argc, const char **argv, RzOutputMode mode) {
+	if (argc != 1) {
+		return RZ_CMD_STATUS_WRONG_ARGS;
+	}
+
+	RzBinJavaClass *jclass = core_java_get_class(core);
+	if (!jclass) {
+		return RZ_CMD_STATUS_ERROR;
+	}
+
+	if (mode & RZ_OUTPUT_MODE_JSON) {
+		PJ *pj = pj_new();
+		if (!pj) {
+			return RZ_CMD_STATUS_ERROR;
+		}
+
+		rz_bin_java_class_as_json(jclass, pj);
+		rz_cons_println(pj_string(pj));
+		pj_free(pj);
+	} else {
+		RzStrBuf *sb = rz_strbuf_new("");
+		if (!sb) {
+			return RZ_CMD_STATUS_ERROR;
+		}
+
+		rz_bin_java_class_as_text(jclass, sb);
+		rz_cons_print(rz_strbuf_get(sb));
+		rz_strbuf_free(sb);
+	}
+
+	return RZ_CMD_STATUS_OK;
+}
+
+RZ_IPI RzCmdStatus rz_cmd_javap_handler(RzCore *core, int argc, const char **argv, RzOutputMode mode) {
+	if (argc != 1) {
+		return RZ_CMD_STATUS_WRONG_ARGS;
+	}
+
+	RzBinJavaClass *jclass = core_java_get_class(core);
+	if (!jclass) {
+		return RZ_CMD_STATUS_ERROR;
+	}
+
+	if (mode & RZ_OUTPUT_MODE_JSON) {
+		PJ *pj = pj_new();
+		if (!pj) {
+			return RZ_CMD_STATUS_ERROR;
+		}
+
+		rz_bin_java_class_const_pool_as_json(jclass, pj);
+		rz_cons_println(pj_string(pj));
+		pj_free(pj);
+	} else {
+		RzStrBuf *sb = rz_strbuf_new("");
+		if (!sb) {
+			return RZ_CMD_STATUS_ERROR;
+		}
+
+		rz_bin_java_class_const_pool_as_text(jclass, sb);
+		rz_cons_print(rz_strbuf_get(sb));
+		rz_strbuf_free(sb);
+	}
+
+	return RZ_CMD_STATUS_OK;
+}
+
+RZ_IPI RzCmdStatus rz_cmd_javai_handler(RzCore *core, int argc, const char **argv, RzOutputMode mode) {
+	if (argc != 1) {
+		return RZ_CMD_STATUS_WRONG_ARGS;
+	}
+
+	RzBinJavaClass *jclass = core_java_get_class(core);
+	if (!jclass) {
+		return RZ_CMD_STATUS_ERROR;
+	}
+
+	if (mode & RZ_OUTPUT_MODE_JSON) {
+		PJ *pj = pj_new();
+		if (!pj) {
+			return RZ_CMD_STATUS_ERROR;
+		}
+
+		rz_bin_java_class_interfaces_as_json(jclass, pj);
+		rz_cons_println(pj_string(pj));
+		pj_free(pj);
+	} else {
+		RzStrBuf *sb = rz_strbuf_new("");
+		if (!sb) {
+			return RZ_CMD_STATUS_ERROR;
+		}
+
+		rz_bin_java_class_interfaces_as_text(jclass, sb);
+		rz_cons_print(rz_strbuf_get(sb));
+		rz_strbuf_free(sb);
+	}
+
+	return RZ_CMD_STATUS_OK;
+}
+
+RZ_IPI RzCmdStatus rz_cmd_javam_handler(RzCore *core, int argc, const char **argv, RzOutputMode mode) {
+	if (argc != 1) {
+		return RZ_CMD_STATUS_WRONG_ARGS;
+	}
+
+	RzBinJavaClass *jclass = core_java_get_class(core);
+	if (!jclass) {
+		return RZ_CMD_STATUS_ERROR;
+	}
+
+	if (mode & RZ_OUTPUT_MODE_JSON) {
+		PJ *pj = pj_new();
+		if (!pj) {
+			return RZ_CMD_STATUS_ERROR;
+		}
+
+		rz_bin_java_class_methods_as_json(jclass, pj);
+		rz_cons_println(pj_string(pj));
+		pj_free(pj);
+	} else {
+		RzStrBuf *sb = rz_strbuf_new("");
+		if (!sb) {
+			return RZ_CMD_STATUS_ERROR;
+		}
+
+		rz_bin_java_class_methods_as_text(jclass, sb);
+		rz_cons_print(rz_strbuf_get(sb));
+		rz_strbuf_free(sb);
+	}
+
+	return RZ_CMD_STATUS_OK;
+}
+
+RZ_IPI RzCmdStatus rz_cmd_javaf_handler(RzCore *core, int argc, const char **argv, RzOutputMode mode) {
+	if (argc != 1) {
+		return RZ_CMD_STATUS_WRONG_ARGS;
+	}
+
+	RzBinJavaClass *jclass = core_java_get_class(core);
+	if (!jclass) {
+		return RZ_CMD_STATUS_ERROR;
+	}
+
+	if (mode & RZ_OUTPUT_MODE_JSON) {
+		PJ *pj = pj_new();
+		if (!pj) {
+			return RZ_CMD_STATUS_ERROR;
+		}
+
+		rz_bin_java_class_fields_as_json(jclass, pj);
+		rz_cons_println(pj_string(pj));
+		pj_free(pj);
+	} else {
+		RzStrBuf *sb = rz_strbuf_new("");
+		if (!sb) {
+			return RZ_CMD_STATUS_ERROR;
+		}
+
+		rz_bin_java_class_fields_as_text(jclass, sb);
+		rz_cons_print(rz_strbuf_get(sb));
+		rz_strbuf_free(sb);
+	}
+
+	return RZ_CMD_STATUS_OK;
+}
+
+static const RzCmdDescArg cmd_java_args[] = {
 	{ 0 },
 };
 
 static const RzCmdDescHelp cmd_java_help = {
-	.summary = "Extra commands to visualize java details",
-	.description = "Type `java help` for more commands.",
+	.summary = "This help page",
+	.description = "Type `java` for more commands.",
 	.args = cmd_java_args,
 };
 
+static const RzCmdDescHelp java_usage = {
+	.summary = "Core plugin to visualize java class information",
+};
+
+static_description_without_args(javac, "prints the class structure");
+static_description_without_args(javap, "prints the class constant pool");
+static_description_without_args(javaf, "prints the class fields");
+static_description_without_args(javai, "prints the class interfaces");
+static_description_without_args(javam, "prints the class methods");
+
 static bool rz_cmd_java_init_handler(RzCore *core) {
-	RzCmd *cmd = core->rcmd;
-	RzCmdDesc *root_cd = rz_cmd_get_root(cmd);
+	RzCmd *rcmd = core->rcmd;
+	RzCmdDesc *root_cd = rz_cmd_get_root(rcmd);
 	if (!root_cd) {
 		return false;
 	}
 
-	RzCmdDesc *cmd_java_cd = rz_cmd_desc_argv_new(cmd, root_cd, "java", rz_cmd_java_handler, &cmd_java_help);
-	rz_warn_if_fail(cmd_java_cd);
-	return cmd_java_cd != NULL;
+	RzCmdDesc *java = rz_cmd_desc_group_new(rcmd, root_cd, "java", name_handler(java), &name_help(java), &java_usage);
+	if (!java) {
+		rz_warn_if_reached();
+		return false;
+	}
+
+	rz_cmd_desc_argv_modes_new_warn(rcmd, java, javap, RZ_OUTPUT_MODE_STANDARD | RZ_OUTPUT_MODE_JSON);
+	rz_cmd_desc_argv_modes_new_warn(rcmd, java, javac, RZ_OUTPUT_MODE_STANDARD | RZ_OUTPUT_MODE_JSON);
+	rz_cmd_desc_argv_modes_new_warn(rcmd, java, javai, RZ_OUTPUT_MODE_STANDARD | RZ_OUTPUT_MODE_JSON);
+	rz_cmd_desc_argv_modes_new_warn(rcmd, java, javam, RZ_OUTPUT_MODE_STANDARD | RZ_OUTPUT_MODE_JSON);
+	rz_cmd_desc_argv_modes_new_warn(rcmd, java, javaf, RZ_OUTPUT_MODE_STANDARD | RZ_OUTPUT_MODE_JSON);
+
+	return true;
 }
 
 RzCorePlugin rz_core_plugin_java = {

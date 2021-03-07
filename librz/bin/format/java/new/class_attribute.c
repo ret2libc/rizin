@@ -358,6 +358,9 @@ bool java_attribute_set_modulepackages(Attribute *attr, RzBuffer *buf) {
 			rz_warn_if_reached();
 			return false;
 		}
+		for (ut32 k = 0; k < amp->package_count; ++k) {
+			amp->package_index[k] = rz_buf_read_be16(buf);
+		}
 	}
 
 	attr->type = ATTRIBUTE_TYPE_MODULEPACKAGES;
@@ -467,6 +470,9 @@ void java_attribute_free(Attribute *attr) {
 		free(am->uses_index);
 		free(am->exports);
 		free(am->requires);
+	} else if (attr->type == ATTRIBUTE_TYPE_MODULEPACKAGES) {
+		AttributeModulePackages *amp = (AttributeModulePackages *)attr->info;
+		free(amp->package_index);
 	}
 	free(attr->info);
 	free(attr);
