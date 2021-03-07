@@ -510,6 +510,115 @@ RZ_API void rz_bin_java_class_as_text(RzBinJavaClass *bin, RzStrBuf *sb) {
 	}
 }
 
+RZ_API RzBinAddr *rz_bin_java_class_resolve_symbol(RzBinJavaClass *bin, int resolve) {
+	RzBinAddr *ret = RZ_NEW0(RzBinAddr);
+	if (!ret) {
+		return NULL;
+	}
+	ret->paddr = UT64_MAX;
+
+	char *name = NULL;
+	if (bin->methods) {
+		for (ut32 i = 0; i < bin->methods_count; ++i) {
+			const Method *method = bin->methods[i];
+			if (!method) {
+				rz_warn_if_reached();
+				continue;
+			}
+
+			name = java_class_constant_pool_stringify_at(bin, method->name_index);
+			if (!name) {
+				continue;
+			}
+
+			if (resolve == RZ_BIN_SYM_ENTRY || resolve == RZ_BIN_SYM_INIT) {
+				if (strcmp(name, "<init>") != 0 && strcmp(name, "<clinit>") != 0) {
+					free(name);
+					continue;
+				}
+			} else if (resolve == RZ_BIN_SYM_MAIN) {
+				if (strcmp(name, "main") != 0) {
+					free(name);
+					continue;
+				}
+			}
+			free(name);
+			ut64 addr = UT64_MAX;
+			for (ut32 i = 0; i < method->attributes_count; ++i) {
+				Attribute *attr = method->attributes[i];
+				if (attr && attr->type == ATTRIBUTE_TYPE_CODE) {
+					AttributeCode *ac = (AttributeCode *)attr->info;
+					addr = ac->code_offset;
+					break;
+				}
+			}
+			if (addr == UT64_MAX) {
+				rz_warn_if_reached();
+				continue;
+			}
+			ret->paddr = addr;
+			break;
+		}
+	}
+	return ret;
+}
+
+RZ_API RzList *rz_bin_java_class_entrypoints(RzBinJavaClass *bin) {
+	rz_return_val_if_fail(bin, NULL);
+
+	RzList *list = rz_list_newf(free);
+	if (!list) {
+		return NULL;
+	}
+
+	char *name = NULL;
+	bool is_static;
+	if (bin->methods) {
+		for (ut32 i = 0; i < bin->methods_count; ++i) {
+			const Method *method = bin->methods[i];
+			if (!method) {
+				rz_warn_if_reached();
+				continue;
+			}
+			is_static = method->access_flags & METHOD_ACCESS_FLAG_STATIC;
+			if (!is_static) {
+				name = java_class_constant_pool_stringify_at(bin, method->name_index);
+				if (!name) {
+					continue;
+				}
+				if (strcmp(name, "main") != 0 && strcmp(name, "<init>") != 0 && strcmp(name, "<clinit>") != 0) {
+					free(name);
+					continue;
+				}
+				free(name);
+			}
+
+			ut64 addr = UT64_MAX;
+			for (ut32 i = 0; i < method->attributes_count; ++i) {
+				Attribute *attr = method->attributes[i];
+				if (attr && attr->type == ATTRIBUTE_TYPE_CODE) {
+					AttributeCode *ac = (AttributeCode *)attr->info;
+					addr = ac->code_offset;
+					break;
+				}
+			}
+			if (addr == UT64_MAX) {
+				rz_warn_if_reached();
+				continue;
+			}
+
+			RzBinAddr *entrypoint = RZ_NEW0(RzBinAddr);
+			if (!entrypoint) {
+				rz_warn_if_reached();
+				continue;
+			}
+			entrypoint->vaddr = entrypoint->paddr = addr;
+			rz_list_append(list, entrypoint);
+		}
+	}
+	return list;
+}
+
 static char* add_class_name_to_name(char* name, char* classname) {
 	char* tmp;
 	if (classname && name) {

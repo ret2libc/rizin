@@ -43,6 +43,46 @@ EOF
 RUN
 
 
+NAME=Check that entry point points to main
+FILE=bins/java/HiKt.class
+CMDS=iS ; s
+EXPECT=<<EOF
+[Sections]
+
+nth paddr        size vaddr       vsize perm name
+―――――――――――――――――――――――――――――――――――――――――――――――――
+0   0x0000000a  0x201 0x0000000a  0x201 -r-- class.constant_pool
+1   0x0000020f   0x4e 0x0000020f   0x4e -r-- class.methods
+2   0x0000020f   0x4e 0x0000020f   0x4e -r-- class.methods.main.attr
+3   0x00000225   0x31 0x00000225   0x31 -r-x class.methods.main.attr.0.code
+4   0x0000025d   0x54 0x0000025d   0x54 -r-- class.attr
+
+0x225
+EOF
+RUN
+
+
+NAME=Check that entry point points to <init>
+FILE=bins/java/jdwpexeccmd.class
+CMDS=iS ; s
+EXPECT=<<EOF
+[Sections]
+
+nth paddr        size vaddr       vsize perm name
+―――――――――――――――――――――――――――――――――――――――――――――――――
+0   0x0000000a  0x315 0x0000000a  0x315 -r-- class.constant_pool
+1   0x00000323  0x124 0x00000323  0x124 -r-- class.methods
+2   0x00000323   0x2b 0x00000323   0x2b -r-- class.methods._init_.attr
+3   0x00000339   0x1d 0x00000339   0x1d -r-x class.methods._init_.attr.0.code
+4   0x0000034e   0xf9 0x0000034e   0xf9 -r-- class.methods.run.attr
+5   0x00000364   0xe9 0x00000364   0xe9 -r-x class.methods.run.attr.0.code
+6   0x00000447    0x8 0x00000447    0x8 -r-- class.attr
+
+0x339
+EOF
+RUN
+
+
 NAME=Java list symbols crash2.class
 FILE=bins/java/crash2.class
 CMDS=is

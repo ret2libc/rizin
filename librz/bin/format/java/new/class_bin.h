@@ -73,6 +73,8 @@ RZ_API void rz_bin_java_class_as_json(RzBinJavaClass *bin, PJ *j);
 RZ_API void rz_bin_java_class_as_text(RzBinJavaClass *bin, RzStrBuf *sb);
 
 /* used in bin_java.c and core_java.c */
+RZ_API RzBinAddr *rz_bin_java_class_resolve_symbol(RzBinJavaClass *bin, int resolve);
+RZ_API RzList *rz_bin_java_class_entrypoints(RzBinJavaClass *bin);
 RZ_API RzList *rz_bin_java_class_methods_as_symbols(RzBinJavaClass *bin);
 RZ_API void rz_bin_java_class_methods_as_text(RzBinJavaClass *bin, RzStrBuf *sb);
 RZ_API void rz_bin_java_class_methods_as_json(RzBinJavaClass *bin, PJ *j);
