@@ -1371,3 +1371,33 @@ EOF
 RUN
 
 
+NAME=java disasm crash
+FILE=bins/java/ExCaseTableSwitch.class
+CMDS=pd 10 >/dev/null
+EXPECT=<<EOF
+EOF
+RUN
+
+
+NAME=java switch crash
+FILE=bins/fuzzed/zin7a5.class
+CMDS=<<EOF
+e scr.null=true
+pd 100
+EOF
+EXPECT=<<EOF
+EOF
+RUN
+
+
+NAME=java old format support
+FILE=bins/java/invisible.class
+CMDS=pi 3
+BROKEN=1
+EXPECT=<<EOF
+getstatic java/lang/System/out Ljava/io/PrintStream;
+ldc "See if you can decompile/disassemble me!"
+invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V
+EOF
+RUN
+
