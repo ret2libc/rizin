@@ -1,3 +1,4 @@
+// SPDX-FileCopyrightText: 2021 deroad <wargio@libero.it>
 // SPDX-License-Identifier: LGPL-3.0-only
 
 #include "class_bin.h"
@@ -250,8 +251,30 @@ RZ_API char *rz_bin_java_class_version(RzBinJavaClass *bin) {
 }
 
 RZ_API ut64 rz_bin_java_class_debug_info(RzBinJavaClass *bin) {
-	// TODO: detect it based on the class file.
-	return RZ_BIN_DBG_LINENUMS | RZ_BIN_DBG_SYMS;
+	if (!bin) {
+		return 0;
+	}
+	if (bin->methods) {
+		for (ut32 i = 0; i < bin->methods_count; ++i) {
+			Method *method = bin->methods[i];
+			if (!method || method->attributes_count < 1) {
+				continue;
+			}
+			for (ut32 k = 0; k < method->attributes_count; ++k) {
+				Attribute *attr = method->attributes[k];
+				if (attr && attr->type == ATTRIBUTE_TYPE_CODE) {
+					AttributeCode *ac = (AttributeCode *)attr->info;
+					for (ut32 k = 0; k < ac->attributes_count; k++) {
+						Attribute *cattr = ac->attributes[k];
+						if (cattr && cattr->type == ATTRIBUTE_TYPE_LINENUMBERTABLE) {
+							return RZ_BIN_DBG_LINENUMS | RZ_BIN_DBG_SYMS;
+						}
+					}
+				}
+			}
+		}
+	}
+	return RZ_BIN_DBG_SYMS;
 }
 
 RZ_API char* rz_bin_java_class_language(RzBinJavaClass *bin) {

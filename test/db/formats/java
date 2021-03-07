@@ -25,6 +25,24 @@ EOF
 RUN
 
 
+NAME=Check if has line number
+FILE=bins/java/Main.class
+CMDS=iI~linenum
+EXPECT=<<EOF
+linenum  true
+EOF
+RUN
+
+
+NAME=Check that it does not have line number
+FILE=bins/java/TryWithResources.class
+CMDS=iI~linenum
+EXPECT=<<EOF
+linenum  false
+EOF
+RUN
+
+
 NAME=Java list symbols crash2.class
 FILE=bins/java/crash2.class
 CMDS=is
