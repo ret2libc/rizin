@@ -3,24 +3,28 @@
 #include "class_bin.h"
 #include "class_private.h"
 
+#define java_class_is_older_format(bin) \
+	((bin)->major_version < (45) || \
+	((bin)->major_version == (45) && (bin)->minor_version < (3)))
+
 #define CLASS_ACCESS_FLAGS_SIZE 16
 static const AccessFlagsReadable access_flags_list[CLASS_ACCESS_FLAGS_SIZE] = {
-	{ ACCESS_FLAG_PUBLIC, "public" },
-	{ ACCESS_FLAG_PRIVATE, "private" },
-	{ ACCESS_FLAG_PROTECTED, "protected" },
-	{ ACCESS_FLAG_STATIC, "static" },
-	{ ACCESS_FLAG_FINAL, "final" },
-	{ ACCESS_FLAG_SUPER, "super" },
-	{ ACCESS_FLAG_BRIDGE, "bridge" },
-	{ ACCESS_FLAG_VARARGS, "varargs" },
-	{ ACCESS_FLAG_NATIVE, "native" },
-	{ ACCESS_FLAG_INTERFACE, "interface" },
-	{ ACCESS_FLAG_ABSTRACT, "abstract" },
-	{ ACCESS_FLAG_STRICT, "strict" },
-	{ ACCESS_FLAG_SYNTHETIC, "synthetic" },
-	{ ACCESS_FLAG_ANNOTATION, "annotation" },
-	{ ACCESS_FLAG_ENUM, "enum" },
-	{ ACCESS_FLAG_MODULE, "module" },
+	{ ACCESS_FLAG_PUBLIC, /*    */ "public" },
+	{ ACCESS_FLAG_PRIVATE, /*   */ "private" },
+	{ ACCESS_FLAG_PROTECTED, /* */ "protected" },
+	{ ACCESS_FLAG_STATIC, /*    */ "static" },
+	{ ACCESS_FLAG_FINAL, /*     */ "final" },
+	{ ACCESS_FLAG_SUPER, /*     */ "super" },
+	{ ACCESS_FLAG_BRIDGE, /*    */ "bridge" },
+	{ ACCESS_FLAG_VARARGS, /*   */ "varargs" },
+	{ ACCESS_FLAG_NATIVE, /*    */ "native" },
+	{ ACCESS_FLAG_INTERFACE, /* */ "interface" },
+	{ ACCESS_FLAG_ABSTRACT, /*  */ "abstract" },
+	{ ACCESS_FLAG_STRICT, /*    */ "strict" },
+	{ ACCESS_FLAG_SYNTHETIC, /* */ "synthetic" },
+	{ ACCESS_FLAG_ANNOTATION, /**/ "annotation" },
+	{ ACCESS_FLAG_ENUM, /*      */ "enum" },
+	{ ACCESS_FLAG_MODULE, /*    */ "module" },
 };
 
 static const ConstPool *java_class_constant_pool_at(RzBinJavaClass *bin, ut32 index) {
@@ -44,6 +48,7 @@ static ut32 sanitize_size(st64 buffer_size, ut32 count, ut32 min_struct_size) {
 }
 
 static bool java_class_parse(RzBinJavaClass *bin, ut64 base, Sdb *kv, RzBuffer *buf, ut64 *size) {
+	// https://docs.oracle.com/javase/specs/jvms/se15/html/jvms-4.html#jvms-4.1
 	ut64 offset = 0;
 	st64 buffer_size = rz_buf_size(buf);
 	if (buffer_size < 1) {
@@ -242,6 +247,37 @@ RZ_API char *rz_bin_java_class_version(RzBinJavaClass *bin) {
 	}
 #undef is_version
 	return rz_str_newf("jdk unknown (%u, %u)", bin->major_version, bin->minor_version);
+}
+
+RZ_API ut64 rz_bin_java_class_debug_info(RzBinJavaClass *bin) {
+	// TODO: detect it based on the class file.
+	return RZ_BIN_DBG_LINENUMS | RZ_BIN_DBG_SYMS;
+}
+
+RZ_API char* rz_bin_java_class_language(RzBinJavaClass *bin) {
+	rz_return_val_if_fail(bin, NULL);
+	const char* language = "java";
+	char *string = NULL;
+	if (bin->constant_pool) {
+		for (ut32 i = 0; i < bin->constant_pool_count; ++i) {
+			const ConstPool* cpool = bin->constant_pool[i];
+			if (!cpool || !java_constant_pool_is_string(cpool)) {
+				continue;
+			}
+			char *string = java_constant_pool_stringify(cpool);
+			if (!strncmp(string, "kotlin/jvm", 10)) {
+				language = "kotlin";
+				break;
+			} else if (!strncmp(string, "org/codehaus/groovy/runtime", 27)) {
+				language = "groovy";
+				break;
+			}
+			free(string);
+			string = NULL;
+		}
+	}
+	free(string);
+	return strdup(language);
 }
 
 RZ_API void rz_bin_java_class_free(RzBinJavaClass *bin) {

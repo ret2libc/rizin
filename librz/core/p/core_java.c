@@ -63,10 +63,6 @@ static bool rz_cmd_java_init_handler(RzCore *core) {
 	return cmd_java_cd != NULL;
 }
 
-static int rz_cmd_java_call_handler(void *user, const char *unused) {
-	return false;
-}
-
 RzCorePlugin rz_core_plugin_java = {
 	.name = "java",
 	.desc = "Suite of java commands, java help for more info",

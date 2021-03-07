@@ -21,7 +21,7 @@ static RzBinInfo *info(RzBinFile *bf) {
 	if (!binfo) {
 		return NULL;
 	}
-	binfo->lang /*      */ = strdup("java");
+	binfo->lang /*      */ = rz_bin_java_class_language(jclass);
 	binfo->file /*      */ = strdup(bf->file);
 	binfo->type /*      */ = strdup("JAVA CLASS");
 	binfo->bclass /*    */ = rz_bin_java_class_version(jclass);
@@ -33,7 +33,7 @@ static RzBinInfo *info(RzBinFile *bf) {
 	binfo->arch /*      */ = strdup("java");
 	binfo->bits /*      */ = 32;
 	binfo->big_endian /**/ = true;
-	binfo->dbg_info /*  */ = 4 | 8; // LineNums | Syms
+	binfo->dbg_info /*  */ = rz_bin_java_class_debug_info(jclass);
 	return binfo;
 }
 

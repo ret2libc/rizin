@@ -1,3 +1,30 @@
+NAME=Check if is Java lang
+FILE=bins/java/Hello.class
+CMDS=iI~lang
+EXPECT=<<EOF
+lang     java
+EOF
+RUN
+
+
+NAME=Check if is Kotlin lang
+FILE=bins/java/HiKt.class
+CMDS=iI~lang
+EXPECT=<<EOF
+lang     kotlin
+EOF
+RUN
+
+
+NAME=Check if is Groovy lang
+FILE=bins/java/test.class
+CMDS=iI~lang
+EXPECT=<<EOF
+lang     groovy
+EOF
+RUN
+
+
 NAME=Java list symbols crash2.class
 FILE=bins/java/crash2.class
 CMDS=is
