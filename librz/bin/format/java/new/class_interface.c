@@ -8,5 +8,5 @@ Interface *java_interface_new(RzBuffer *buf, ut64 offset) {
 	rz_return_val_if_fail(attr, NULL);
 	attr->offset = offset;
 	attr->index = rz_buf_read_be16(buf);
-	return NULL;
+	return attr;
 }

@@ -192,6 +192,15 @@ static RzList *entrypoints(RzBinFile *bf) {
 	return rz_bin_java_class_entrypoints(jclass);
 }
 
+static RzList *strings(RzBinFile *bf) {
+	RzBinJavaClass *jclass = rz_bin_file_get_java_class(bf);
+	if (!jclass) {
+		return NULL;
+	}
+
+	return rz_bin_java_class_strings(jclass);
+}
+
 static int demangle_type(const char *str) {
 	return RZ_BIN_NM_JAVA;
 }
@@ -210,7 +219,7 @@ RzBinPlugin rz_bin_plugin_java = {
 	.sections = sections,
 	.symbols = symbols,
 	.imports = &imports,
-	//.strings = &strings,
+	.strings = &strings,
 	.info = &info,
 	.fields = fields,
 	.libs = libs,

@@ -35,7 +35,7 @@ char *java_field_access_flags_readable(const Field *field) {
 		}
 	}
 
-	return rz_strbuf_drain(sb);
+	return sb ? rz_strbuf_drain(sb) : NULL;
 }
 
 Field *java_field_new(ConstPool **pool, ut32 poolsize, RzBuffer *buf, ut64 offset) {

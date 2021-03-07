@@ -151,7 +151,7 @@ char *java_constant_pool_stringify(const ConstPool *cpool) {
 		if (!cpool->size) {
 			return NULL;
 		}
-		return rz_str_encoded_json(cpool->buffer, cpool->size, 0);
+		return rz_str_encoded_json((const char*)cpool->buffer, cpool->size, 0);
 	}
 	case CONSTANT_POOL_LONG: {
 		st64 value = rz_read_be64(cpool->buffer);

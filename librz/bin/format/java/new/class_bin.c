@@ -387,7 +387,7 @@ RZ_API char *rz_bin_java_class_access_flags_readable(RzBinJavaClass *bin) {
 		}
 	}
 
-	return rz_strbuf_drain(sb);
+	return sb ? rz_strbuf_drain(sb) : NULL;
 }
 
 static int calculate_padding_ut16(ut16 count) {
@@ -522,7 +522,6 @@ RZ_API RzBinAddr *rz_bin_java_class_resolve_symbol(RzBinJavaClass *bin, int reso
 		for (ut32 i = 0; i < bin->methods_count; ++i) {
 			const Method *method = bin->methods[i];
 			if (!method) {
-				rz_warn_if_reached();
 				continue;
 			}
 
@@ -619,6 +618,44 @@ RZ_API RzList *rz_bin_java_class_entrypoints(RzBinJavaClass *bin) {
 	return list;
 }
 
+RZ_API RzList *rz_bin_java_class_strings(RzBinJavaClass *bin) {
+	rz_return_val_if_fail(bin, NULL);
+
+	RzList *list = rz_list_newf(rz_bin_string_free);
+	if (!list) {
+		return NULL;
+	}
+
+	char *string;
+	if (bin->constant_pool_count > 0) {
+		for (ut32 i = 1; i < bin->constant_pool_count; ++i) {
+			const ConstPool *cpool = bin->constant_pool[i];
+			if (!cpool || !java_constant_pool_is_string(cpool) || cpool->size < 1) {
+				continue;
+			}
+			string = java_constant_pool_stringify(cpool);
+			if (!string) {
+				rz_warn_if_reached();
+				continue;
+			}
+			RzBinString *bstr = RZ_NEW0(RzBinString);
+			if (!bstr) {
+				free(string);
+				rz_warn_if_reached();
+				continue;
+			}
+			bstr->paddr = cpool->offset;
+			bstr->ordinal = i;
+			bstr->length = cpool->size;
+			bstr->size = cpool->size;
+			bstr->string = string;
+			bstr->type = RZ_STRING_TYPE_UTF8;
+			rz_list_append(list, bstr);
+		}
+	}
+	return list;
+}
+
 static char* add_class_name_to_name(char* name, char* classname) {
 	char* tmp;
 	if (classname && name) {
@@ -706,10 +743,14 @@ RZ_API void rz_bin_java_class_methods_as_text(RzBinJavaClass *bin, RzStrBuf *sb)
 			name = java_class_constant_pool_stringify_at(bin, method->name_index);
 			descr = java_class_constant_pool_stringify_at(bin, method->descriptor_index);
 
-			rz_strbuf_appendf(sb, "  %s %s%s;\n", flags, name, descr);
+			if (flags) {
+				rz_strbuf_appendf(sb, "  %s %s%s;\n", flags, name, descr);
+			} else {
+				rz_strbuf_appendf(sb, "  %s%s;\n", name, descr);
+			}
 			rz_strbuf_appendf(sb, "    name: %s\n", name);
 			rz_strbuf_appendf(sb, "    descriptor: %s\n", descr);
-			rz_strbuf_appendf(sb, "    flags: (0x%04x) %s\n", method->access_flags, flags);
+			rz_strbuf_appendf(sb, "    flags: (0x%04x) %s\n", method->access_flags, flags ? flags : "");
 
 			free(flags);
 			free(name);
@@ -723,7 +764,7 @@ RZ_API void rz_bin_java_class_methods_as_text(RzBinJavaClass *bin, RzStrBuf *sb)
 				}
 				snprintf(number, sizeof(number), "#%u", i);
 				name = java_class_constant_pool_stringify_at(bin, attr->attribute_name_index);
-				rz_strbuf_appendf(sb, "    %-*s = #%-5u size: %-5u %s\n", padding, number, attr->attribute_name_index, attr->attribute_length, name);
+				rz_strbuf_appendf(sb, "      %-*s = #%-5u size: %-5u %s\n", padding, number, attr->attribute_name_index, attr->attribute_length, name);
 				free(name);
 			}
 		}
@@ -884,7 +925,11 @@ RZ_API void rz_bin_java_class_fields_as_text(RzBinJavaClass *bin, RzStrBuf *sb) 
 			name = java_class_constant_pool_stringify_at(bin, field->name_index);
 			descr = java_class_constant_pool_stringify_at(bin, field->descriptor_index);
 
-			rz_strbuf_appendf(sb, "  %s %s %s;\n", flags, descr, name);
+			if (flags) {
+				rz_strbuf_appendf(sb, "  %s %s%s;\n", flags, name, descr);
+			} else {
+				rz_strbuf_appendf(sb, "  %s%s;\n", name, descr);
+			}
 			rz_strbuf_appendf(sb, "    name: %s\n", name);
 			rz_strbuf_appendf(sb, "    descriptor: %s\n", descr);
 			rz_strbuf_appendf(sb, "    flags: (0x%04x) %s\n", field->access_flags, flags);
@@ -901,7 +946,7 @@ RZ_API void rz_bin_java_class_fields_as_text(RzBinJavaClass *bin, RzStrBuf *sb) 
 				}
 				snprintf(number, sizeof(number), "#%u", i);
 				name = java_class_constant_pool_stringify_at(bin, attr->attribute_name_index);
-				rz_strbuf_appendf(sb, "    %*s = #%-5u size: %-5u %s\n", padding, number, attr->attribute_name_index, attr->attribute_length, name);
+				rz_strbuf_appendf(sb, "      %*s = #%-5u size: %-5u %s\n", padding, number, attr->attribute_name_index, attr->attribute_length, name);
 				free(name);
 			}
 		}
@@ -1088,9 +1133,15 @@ RZ_API RzList *rz_bin_java_class_const_pool_as_imports(RzBinJavaClass *bin) {
 				rz_warn_if_reached();
 				continue;
 			}
-			import->classname = rz_bin_java_class_name(bin);
+			const ConstPool *cpool = java_class_constant_pool_at(bin, bin->interfaces[i]->index);
+			if (!cpool || java_constant_pool_resolve(cpool, &class_index, NULL) != 1) {
+				rz_warn_if_reached();
+				continue;
+			}
+
+			import->classname = java_class_constant_pool_stringify_at(bin, class_index);
 			rz_str_replace_char(import->classname, '/', '.');
-			import->name = java_class_constant_pool_stringify_at(bin, bin->interfaces[i]->index);
+			import->name = strdup("*");
 			import->bind = RZ_BIN_BIND_WEAK_STR;
 			import->type = RZ_BIN_TYPE_IFACE_STR;
 			import->ordinal = i;
@@ -1350,11 +1401,18 @@ RZ_API void rz_bin_java_class_interfaces_as_text(RzBinJavaClass *bin, RzStrBuf *
 	if (bin->interfaces) {
 		int padding = calculate_padding_ut16(bin->constant_pool_count) + 1;
 		for (ut32 i = 0; i < bin->interfaces_count; ++i) {
+			if (!bin->interfaces[i]) {
+				continue;
+			}
+			const ConstPool *cpool = java_class_constant_pool_at(bin, bin->interfaces[i]->index);
+			if (!cpool || java_constant_pool_resolve(cpool, &index, NULL) != 1) {
+				rz_warn_if_reached();
+				continue;
+			}
 			snprintf(number, sizeof(number), "#%u", i);
-
-			index = bin->interfaces[i]->index;
 			tmp = java_class_constant_pool_stringify_at(bin, index);
-			rz_strbuf_appendf(sb, "  %*s = #%5u %s\n", padding, number, index, tmp);
+			rz_str_replace_char(tmp, '/', '.');
+			rz_strbuf_appendf(sb, "  %*s = #%-5u %s\n", padding, number, index, tmp);
 			free(tmp);
 		}
 	}
@@ -1364,13 +1422,23 @@ RZ_API void rz_bin_java_class_interfaces_as_json(RzBinJavaClass *bin, PJ *j) {
 	rz_return_if_fail(bin && j);
 	pj_a(j);
 	char *tmp = NULL;
+	ut16 index;
 	if (bin->interfaces) {
 		for (ut32 i = 0; i < bin->interfaces_count; ++i) {
+			if (!bin->interfaces[i]) {
+				continue;
+			}
+
+			const ConstPool *cpool = java_class_constant_pool_at(bin, bin->interfaces[i]->index);
+			if (!cpool || java_constant_pool_resolve(cpool, &index, NULL) != 1) {
+				rz_warn_if_reached();
+				continue;
+			}
 			pj_o(j);
 			pj_kn(j, "offset", bin->interfaces[i]->offset);
-			ut16 index = bin->interfaces[i]->index;
-			pj_kn(j, "name_n", index);
+			pj_kn(j, "name_n", bin->interfaces[i]->index);
 			tmp = java_class_constant_pool_stringify_at(bin, index);
+			rz_str_replace_char(tmp, '/', '.');
 			pj_ks(j, "name_s", tmp ? tmp : "");
 			free(tmp);
 			pj_end(j);

@@ -41,7 +41,7 @@ char *java_method_access_flags_readable(const Method *method) {
 		}
 	}
 
-	return rz_strbuf_drain(sb);
+	return sb ? rz_strbuf_drain(sb) : NULL;
 }
 
 Method *java_method_new(ConstPool **pool, ut32 poolsize, RzBuffer *buf, ut64 offset) {
