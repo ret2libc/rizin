@@ -1077,6 +1077,27 @@ RZ_API RzList *rz_bin_java_class_const_pool_as_imports(RzBinJavaClass *bin) {
 		}
 	}
 
+	if (bin->interfaces) {
+		for (ut32 i = 0; i < bin->interfaces_count; ++i) {
+			if (!bin->interfaces[i]) {
+				continue;
+			}
+
+			RzBinImport *import = RZ_NEW0(RzBinImport);
+			if (!import) {
+				rz_warn_if_reached();
+				continue;
+			}
+			import->classname = rz_bin_java_class_name(bin);
+			rz_str_replace_char(import->classname, '/', '.');
+			import->name = java_class_constant_pool_stringify_at(bin, bin->interfaces[i]->index);
+			import->bind = RZ_BIN_BIND_WEAK_STR;
+			import->type = RZ_BIN_TYPE_IFACE_STR;
+			import->ordinal = i;
+			rz_list_append(imports, import);
+		}
+	}
+
 	return imports;
 }
 

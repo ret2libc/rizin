@@ -50,7 +50,7 @@ EXPECT=<<EOF
 [Sections]
 
 nth paddr        size vaddr       vsize perm name
-―――――――――――――――――――――――――――――――――――――――――――――――――
+-------------------------------------------------
 0   0x0000000a  0x201 0x0000000a  0x201 -r-- class.constant_pool
 1   0x0000020f   0x4e 0x0000020f   0x4e -r-- class.methods
 2   0x0000020f   0x4e 0x0000020f   0x4e -r-- class.methods.main.attr
@@ -69,7 +69,7 @@ EXPECT=<<EOF
 [Sections]
 
 nth paddr        size vaddr       vsize perm name
-―――――――――――――――――――――――――――――――――――――――――――――――――
+-------------------------------------------------
 0   0x0000000a  0x315 0x0000000a  0x315 -r-- class.constant_pool
 1   0x00000323  0x124 0x00000323  0x124 -r-- class.methods
 2   0x00000323   0x2b 0x00000323   0x2b -r-- class.methods._init_.attr
