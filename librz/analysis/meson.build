@@ -1,3 +1,8 @@
+# To define a plugin add its name in `analysis_plugins` and define:
+# - `analysis_<pluginName>_sources`: an array of source files
+# - `analysis_<pluginName>_headers`: an array of include directories (optional)
+# - `analysis_<pluginName>_deps`: an array of meson dependencies
+
 analysis_plugins = [
   '6502',
   '8051',
@@ -42,7 +47,6 @@ analysis_plugins = [
   'spc700',
   'sysz',
   'tms320',
-  #'tms320c64x',
   'tricore',
   'v810',
   'v850',
@@ -54,6 +58,408 @@ analysis_plugins = [
   'xcore_cs',
   'xtensa',
   'z80',
+]
+
+analysis_enabled_static_plugins = analysis_plugins
+analysis_enabled_shared_plugins = []
+
+rz_analysis_dependencies = [
+  rz_util_dep,
+  rz_crypto_dep,
+  rz_reg_dep,
+  rz_syscall_dep,
+  rz_search_dep,
+  rz_cons_dep,
+  rz_flag_dep,
+  rz_hash_dep,
+  rz_parse_dep,
+  rz_asm_dep,
+  rz_bin_dep,
+]
+
+analysis_6502_sources = [
+  'p/analysis_6502.c',
+]
+
+analysis_6502_headers = [
+  '../asm/arch/6502/',
+]
+
+analysis_6502_cs_sources = [
+  'p/analysis_6502_cs.c',
+]
+
+analysis_6502_cs_deps = [
+  capstone_dep,
+]
+
+analysis_8051_sources = [
+  'p/analysis_8051.c',
+]
+
+analysis_8051_headers = [
+  '../asm/arch/8051/',
+]
+
+analysis_amd29k_sources = [
+  'p/analysis_amd29k.c',
+  '../asm/arch/amd29k/amd29k.c',
+]
+
+analysis_arc_sources = [
+  'p/analysis_arc.c',
+]
+
+analysis_arm_cs_sources = [
+  'p/analysis_arm_cs.c',
+]
+
+analysis_arm_cs_deps = [
+  capstone_dep,
+]
+
+analysis_arm_gnu_sources = [
+  'p/analysis_arm_gnu.c',
+  '../asm/arch/arm/winedbg/be_arm.c',
+]
+
+analysis_arm_gnu_headers = [
+  '../asm/arch/arm/',
+]
+
+analysis_avr_sources = [
+  'p/analysis_avr.c',
+  '../asm/arch/avr/avr_disasm.c',
+  '../asm/arch/avr/format.c',
+  '../asm/arch/avr/disasm.c',
+]
+
+analysis_bf_sources = [
+  'p/analysis_bf.c',
+]
+
+analysis_chip8_sources = [
+  'p/analysis_chip8.c',
+]
+
+analysis_cr16_sources = [
+  'p/analysis_cr16.c',
+  '../asm/arch/cr16/cr16_disas.c',
+]
+
+analysis_cr16_headers = [
+  '../asm/arch/cr16/',
+]
+
+analysis_cris_sources = [
+  'p/analysis_cris.c',
+]
+
+analysis_dalvik_sources = [
+  'p/analysis_dalvik.c',
+]
+
+analysis_ebc_sources = [
+  'p/analysis_ebc.c',
+  '../asm/arch/ebc/ebc_disas.c',
+]
+
+analysis_ebc_headers = [
+  '../asm/arch/ebc/',
+]
+
+analysis_gb_sources = [
+  'p/analysis_gb.c',
+]
+
+analysis_gb_headers = [
+  'arch/gb/',
+  '../asm/arch/gb/',
+]
+
+analysis_h8300_sources = [
+  'p/analysis_h8300.c',
+  '../asm/arch/h8300/h8300_disas.c',
+]
+
+analysis_h8300_headers = [
+  '../asm/arch/h8300/',
+]
+
+analysis_hexagon_sources = [
+  'p/analysis_hexagon.c',
+  'arch/hexagon/hexagon_analysis.c',
+  '../asm/arch/hexagon/hexagon.c',
+  '../asm/arch/hexagon/hexagon_disas.c',
+]
+
+analysis_hexagon_headers = [
+  'arch/hexagon/',
+  '../asm/arch/hexagon/',
+]
+
+analysis_i4004_sources = [
+  'p/analysis_i4004.c',
+]
+
+analysis_i8080_sources = [
+  'p/analysis_i8080.c',
+]
+
+analysis_java_sources = [
+  'p/analysis_java.c',
+  '../asm/arch/java/code.c',
+  '../asm/arch/java/ops.c',
+]
+
+analysis_m68k_cs_sources = [
+  'p/analysis_m68k_cs.c',
+]
+
+analysis_m68k_cs_deps = [
+  capstone_dep,
+]
+
+analysis_m680x_cs_sources = [
+  'p/analysis_m680x_cs.c',
+]
+
+analysis_m680x_cs_deps = [
+  capstone_dep,
+]
+
+analysis_malbolge_sources = [
+  'p/analysis_malbolge.c',
+]
+
+analysis_mcore_sources = [
+  'p/analysis_mcore.c',
+  '../asm/arch/mcore/mcore.c',
+]
+
+analysis_mips_cs_sources = [
+  'p/analysis_mips_cs.c',
+]
+
+analysis_mips_cs_deps = [
+  capstone_dep,
+]
+
+analysis_mips_gnu_sources = [
+  'p/analysis_mips_gnu.c',
+]
+
+analysis_msp430_sources = [
+  'p/analysis_msp430.c',
+  '../asm/arch/msp430/msp430_disas.c',
+]
+
+analysis_msp430_headers = [
+  '../asm/arch/msp430/',
+]
+
+analysis_nios2_sources = [
+  'p/analysis_nios2.c',
+]
+
+analysis_null_sources = [
+  'p/analysis_null.c',
+]
+
+analysis_or1k_sources = [
+  'p/analysis_or1k.c',
+  '../asm/arch/or1k/or1k_disas.c',
+]
+
+analysis_or1k_headers = [
+  '../asm/arch/or1k/',
+]
+
+analysis_pic_sources = [
+  'p/analysis_pic.c',
+  '../asm/arch/pic/pic_midrange.c',
+]
+
+analysis_ppc_cs_sources = [
+  'p/analysis_ppc_cs.c',
+  '../asm/arch/ppc/libvle/vle.c',
+]
+
+analysis_ppc_cs_deps = [
+  capstone_dep,
+]
+
+analysis_ppc_gnu_sources = [
+  'p/analysis_ppc_gnu.c',
+  '../asm/arch/ppc/libvle/vle.c',
+]
+
+analysis_propeller_sources = [
+  'p/analysis_propeller.c',
+  '../asm/arch/propeller/propeller_disas.c',
+]
+
+analysis_propeller_headers = [
+  '../asm/arch/propeller/',
+]
+
+analysis_pyc_sources = [
+  'p/analysis_pyc.c',
+  '../asm/arch/pyc/opcode_10.c',
+  '../asm/arch/pyc/opcode_11.c',
+  '../asm/arch/pyc/opcode_12.c',
+  '../asm/arch/pyc/opcode_13.c',
+  '../asm/arch/pyc/opcode_14.c',
+  '../asm/arch/pyc/opcode_15.c',
+  '../asm/arch/pyc/opcode_16.c',
+  '../asm/arch/pyc/opcode_20.c',
+  '../asm/arch/pyc/opcode_21.c',
+  '../asm/arch/pyc/opcode_22.c',
+  '../asm/arch/pyc/opcode_23.c',
+  '../asm/arch/pyc/opcode_24.c',
+  '../asm/arch/pyc/opcode_25.c',
+  '../asm/arch/pyc/opcode_26.c',
+  '../asm/arch/pyc/opcode_27.c',
+  '../asm/arch/pyc/opcode_2x.c',
+  '../asm/arch/pyc/opcode_30.c',
+  '../asm/arch/pyc/opcode_31.c',
+  '../asm/arch/pyc/opcode_32.c',
+  '../asm/arch/pyc/opcode_33.c',
+  '../asm/arch/pyc/opcode_34.c',
+  '../asm/arch/pyc/opcode_35.c',
+  '../asm/arch/pyc/opcode_36.c',
+  '../asm/arch/pyc/opcode_37.c',
+  '../asm/arch/pyc/opcode_38.c',
+  '../asm/arch/pyc/opcode_39.c',
+  '../asm/arch/pyc/opcode_3x.c',
+  '../asm/arch/pyc/opcode_analysis.c',
+  '../asm/arch/pyc/opcode_arg_fmt.c',
+  '../asm/arch/pyc/opcode.c',
+  '../asm/arch/pyc/pyc_dis.c'
+]
+
+analysis_riscv_sources = [
+  'p/analysis_riscv.c',
+]
+
+analysis_rsp_sources = [
+  'p/analysis_rsp.c',
+  '../asm/arch/rsp/rsp_idec.c',
+]
+
+analysis_sh_sources = [
+  'p/analysis_sh.c',
+]
+
+analysis_snes_sources = [
+  'p/analysis_snes.c',
+]
+
+analysis_sparc_cs_sources = [
+  'p/analysis_sparc_cs.c',
+]
+
+analysis_sparc_cs_deps = [
+  capstone_dep,
+]
+
+analysis_sparc_gnu_sources = [
+  'p/analysis_sparc_gnu.c',
+]
+
+analysis_spc700_sources = [
+  'p/analysis_spc700.c',
+]
+
+analysis_sysz_sources = [
+  'p/analysis_sysz.c',
+]
+
+analysis_sysz_deps = [
+  capstone_dep,
+]
+
+analysis_tms320_sources = [
+  'p/analysis_tms320.c',
+  'p/analysis_tms320_c55x_plus.c',
+  '../asm/arch/tms320/tms320_dasm.c',
+  '../asm/arch/tms320/c55x_plus/ins.c',
+  '../asm/arch/tms320/c55x_plus/c55plus.c',
+  '../asm/arch/tms320/c55x_plus/c55plus_decode.c',
+  '../asm/arch/tms320/c55x_plus/decode_funcs.c',
+  '../asm/arch/tms320/c55x_plus/hashtable.c',
+  '../asm/arch/tms320/c55x_plus/utils.c',
+]
+
+analysis_tms320_deps = [
+  capstone_dep,
+]
+
+analysis_tricore_sources = [
+  'p/analysis_tricore.c',
+]
+
+analysis_v810_sources = [
+  'p/analysis_v810.c',
+  '../asm/arch/v810/v810_disas.c',
+]
+
+analysis_v810_headers = [
+  '../asm/arch/v810/',
+]
+
+analysis_v850_sources = [
+  'p/analysis_v850.c',
+  '../asm/arch/v850/v850_disas.c',
+]
+
+analysis_v850_headers = [
+  '../asm/arch/v850/',
+]
+
+analysis_vax_sources = [
+  'p/analysis_vax.c',
+]
+
+analysis_wasm_sources = [
+  'p/analysis_wasm.c',
+  '../asm/arch/wasm/wasm.c',
+]
+
+analysis_ws_sources = [
+  'p/analysis_ws.c',
+]
+
+analysis_x86_cs_sources = [
+  'p/analysis_x86_cs.c',
+]
+
+analysis_x86_cs_deps = [
+  capstone_dep,
+]
+
+analysis_xap_sources = [
+  'p/analysis_xap.c',
+]
+
+analysis_xcore_cs_sources = [
+  'p/analysis_xcore_cs.c',
+]
+
+analysis_xcore_cs_deps = [
+  capstone_dep,
+]
+
+analysis_xtensa_sources = [
+  'p/analysis_xtensa.c',
+  '../asm/arch/xtensa/gnu/xtensa-dis.c',
+  '../asm/arch/xtensa/gnu/elf32-xtensa.c',
+  '../asm/arch/xtensa/gnu/xtensa-isa.c',
+  '../asm/arch/xtensa/gnu/xtensa-modules.c',
+]
+
+analysis_z80_sources = [
+  'p/analysis_z80.c',
 ]
 
 rz_analysis_sources = [
@@ -95,204 +501,39 @@ rz_analysis_sources = [
   'vtable.c',
   'xrefs.c',
   'serialize_analysis.c',
-  'p/analysis_6502.c',
-  'p/analysis_6502_cs.c',
-  'p/analysis_8051.c',
-  'p/analysis_amd29k.c',
-  'p/analysis_arc.c',
-  'p/analysis_arm_cs.c',
-  'p/analysis_arm_gnu.c',
-  'p/analysis_avr.c',
-  'p/analysis_bf.c',
-  'p/analysis_chip8.c',
-  'p/analysis_cr16.c',
-  'p/analysis_cris.c',
-  'p/analysis_dalvik.c',
-  'p/analysis_ebc.c',
-  'p/analysis_gb.c',
-  'p/analysis_h8300.c',
-  'p/analysis_hexagon.c',
-  'p/analysis_i4004.c',
-  'p/analysis_i8080.c',
-  'p/analysis_java.c',
-  'p/analysis_m68k_cs.c',
-  'p/analysis_m680x_cs.c',
-  'p/analysis_malbolge.c',
-  'p/analysis_mcore.c',
-  'p/analysis_mips_cs.c',
-  'p/analysis_mips_gnu.c',
-  'p/analysis_msp430.c',
-  'p/analysis_nios2.c',
-  'p/analysis_null.c',
-  'p/analysis_or1k.c',
-  'p/analysis_pic.c',
-  'p/analysis_ppc_cs.c',
-  'p/analysis_ppc_gnu.c',
-  'p/analysis_propeller.c',
-  'p/analysis_pyc.c',
-  'p/analysis_riscv.c',
-  'p/analysis_rsp.c',
-  'p/analysis_sh.c',
-  'p/analysis_snes.c',
-  'p/analysis_sparc_cs.c',
-  'p/analysis_sparc_gnu.c',
-  'p/analysis_spc700.c',
-  'p/analysis_sysz.c',
-  'p/analysis_tms320.c',
-  'p/analysis_tms320_c55x_plus.c',
-  #'p/analysis_tms320c64x.c',
-  'p/analysis_tricore.c',
-  'p/analysis_v810.c',
-  'p/analysis_v850.c',
-  'p/analysis_vax.c',
-  'p/analysis_wasm.c',
-  'p/analysis_ws.c',
-  'p/analysis_x86_cs.c',
-  'p/analysis_xap.c',
-  'p/analysis_xcore_cs.c',
-  'p/analysis_xtensa.c',
-  'p/analysis_z80.c',
-  #'arch/gb/meta_gb_cmt.c',
-  'arch/hexagon/hexagon_analysis.c',
-  '../asm/arch/amd29k/amd29k.c',
-  '../asm/arch/arm/winedbg/be_arm.c',
-  '../asm/arch/avr/avr_disasm.c',
-  '../asm/arch/avr/format.c',
-  '../asm/arch/avr/disasm.c',
-  '../asm/arch/cr16/cr16_disas.c',
-  '../asm/arch/ebc/ebc_disas.c',
-  '../asm/arch/h8300/h8300_disas.c',
-  '../asm/arch/hexagon/hexagon.c',
-  '../asm/arch/hexagon/hexagon_disas.c',
-  '../asm/arch/java/code.c',
-  '../asm/arch/java/ops.c',
-  '../asm/arch/mcore/mcore.c',
-  '../asm/arch/msp430/msp430_disas.c',
-  '../asm/arch/or1k/or1k_disas.c',
-  '../asm/arch/pic/pic_midrange.c',
-  '../asm/arch/ppc/libvle/vle.c',
-  '../asm/arch/propeller/propeller_disas.c',
-  '../asm/arch/rsp/rsp_idec.c',
-  '../asm/arch/tms320/tms320_dasm.c',
-  '../asm/arch/tms320/c55x_plus/ins.c',
-  '../asm/arch/tms320/c55x_plus/c55plus.c',
-  '../asm/arch/tms320/c55x_plus/c55plus_decode.c',
-  '../asm/arch/tms320/c55x_plus/decode_funcs.c',
-  '../asm/arch/tms320/c55x_plus/hashtable.c',
-  '../asm/arch/tms320/c55x_plus/utils.c',
-  '../asm/arch/v810/v810_disas.c',
-  '../asm/arch/v850/v850_disas.c',
-  '../asm/arch/wasm/wasm.c',
-  '../asm/arch/xtensa/gnu/xtensa-dis.c',
-  '../asm/arch/xtensa/gnu/elf32-xtensa.c',
-  '../asm/arch/xtensa/gnu/xtensa-isa.c',
-  '../asm/arch/xtensa/gnu/xtensa-modules.c',
-  '../asm/arch/pyc/opcode_10.c',
-  '../asm/arch/pyc/opcode_11.c',
-  '../asm/arch/pyc/opcode_12.c',
-  '../asm/arch/pyc/opcode_13.c',
-  '../asm/arch/pyc/opcode_14.c',
-  '../asm/arch/pyc/opcode_15.c',
-  '../asm/arch/pyc/opcode_16.c',
-  '../asm/arch/pyc/opcode_20.c',
-  '../asm/arch/pyc/opcode_21.c',
-  '../asm/arch/pyc/opcode_22.c',
-  '../asm/arch/pyc/opcode_23.c',
-  '../asm/arch/pyc/opcode_24.c',
-  '../asm/arch/pyc/opcode_25.c',
-  '../asm/arch/pyc/opcode_26.c',
-  '../asm/arch/pyc/opcode_27.c',
-  '../asm/arch/pyc/opcode_2x.c',
-  '../asm/arch/pyc/opcode_30.c',
-  '../asm/arch/pyc/opcode_31.c',
-  '../asm/arch/pyc/opcode_32.c',
-  '../asm/arch/pyc/opcode_33.c',
-  '../asm/arch/pyc/opcode_34.c',
-  '../asm/arch/pyc/opcode_35.c',
-  '../asm/arch/pyc/opcode_36.c',
-  '../asm/arch/pyc/opcode_37.c',
-  '../asm/arch/pyc/opcode_38.c',
-  '../asm/arch/pyc/opcode_39.c',
-  '../asm/arch/pyc/opcode_3x.c',
-  '../asm/arch/pyc/opcode_analysis.c',
-  '../asm/arch/pyc/opcode_arg_fmt.c',
-  '../asm/arch/pyc/opcode.c',
-  '../asm/arch/pyc/pyc_dis.c'
 ]
 
-rz_analysis_inc = [
-  platform_inc,
-  include_directories(
-    'arch/gb',
-    'arch/hexagon',
-    '../asm/arch/include',
-    '../asm/arch/6502',
-    '../asm/arch/8051',
-    '../asm/arch/amd29k',
-    '../asm/arch/arc',
-    '../asm/arch/arm',
-    '../asm/arch/avr',
-    '../asm/arch/cr16',
-    '../asm/arch/cris',
-    '../asm/arch/dalvik',
-    '../asm/arch/dcpu16',
-    '../asm/arch/ebc',
-    '../asm/arch/gb',
-    '../asm/arch/h8300',
-    '../asm/arch/hexagon',
-    '../asm/arch/hppa',
-    '../asm/arch/i4004',
-    '../asm/arch/i8080',
-    '../asm/arch/java',
-    '../asm/arch/lanai',
-    '../asm/arch/lh5801',
-    '../asm/arch/lm32',
-    '../asm/arch/mcore',
-    '../asm/arch/mcs96',
-    '../asm/arch/mips',
-    '../asm/arch/msp430',
-    '../asm/arch/nios',
-    '../asm/arch/or1k',
-    '../asm/arch/pic',
-    '../asm/arch/ppc',
-    '../asm/arch/propeller',
-    '../asm/arch/pyc',
-    '../asm/arch/riscv',
-    '../asm/arch/rsp',
-    '../asm/arch/sh',
-    '../asm/arch/snes',
-    '../asm/arch/sparc',
-    '../asm/arch/spc700',
-    '../asm/arch/tms320',
-    '../asm/arch/tricore',
-    '../asm/arch/v810',
-    '../asm/arch/v850',
-    '../asm/arch/vax',
-    '../asm/arch/wasm',
-    '../asm/arch/whitespace',
-    '../asm/arch/xap',
-    '../asm/arch/xtensa',
-    '../asm/arch/z80',
-  )
-]
+rz_analysis_inc = [platform_inc]
+
+# compile static plugins
+rz_analysis_plugins_dep = []
+foreach p : analysis_plugins
+  c_files = get_variable('analysis_@0@_sources'.format(p))
+  h_files = get_variable('analysis_@0@_headers'.format(p), [])
+  analysis_plugin_deps = get_variable('analysis_@0@_deps'.format(p), [])
+
+  h_files = include_directories([h_files, '../asm/arch/include/'])
+  name = 'analysis_plugin_@0@'.format(p)
+  analysis_plugin_inc = [h_files, platform_inc]
+
+  if p in analysis_enabled_static_plugins
+    analysis_plugin = static_library(name, c_files,
+      include_directories: analysis_plugin_inc,
+      dependencies: rz_analysis_dependencies + analysis_plugin_deps,
+      c_args: library_cflags,
+      install: false,
+    )
+
+    analysis_plugin_dep = declare_dependency(link_with: analysis_plugin, include_directories: analysis_plugin_inc)
+    set_variable(name + '_dep', analysis_plugin_dep)
+    rz_analysis_plugins_dep += [analysis_plugin_dep]
+  endif
+endforeach
 
 rz_analysis = library('rz_analysis', rz_analysis_sources,
   include_directories: rz_analysis_inc,
   c_args: library_cflags,
-  dependencies: [
-    rz_util_dep,
-    rz_crypto_dep,
-    rz_reg_dep,
-    rz_syscall_dep,
-    rz_search_dep,
-    rz_cons_dep,
-    rz_flag_dep,
-    rz_hash_dep,
-    rz_parse_dep,
-    rz_asm_dep,
-    rz_bin_dep,
-    capstone_dep
-  ],
+  dependencies: rz_analysis_dependencies + rz_analysis_plugins_dep,
   install: true,
   implicit_include_directories: false,
   install_rpath: rpath_lib,
@@ -322,3 +563,23 @@ pkgconfig_mod.generate(rz_analysis,
   ],
   description: 'rizin foundation libraries'
 )
+
+# compile shared plugins
+foreach p : analysis_plugins
+  c_files = get_variable('analysis_@0@_sources'.format(p))
+  h_files = get_variable('analysis_@0@_headers'.format(p), [])
+  analysis_plugin_deps = get_variable('analysis_@0@_deps'.format(p), [])
+
+  h_files = include_directories([h_files, '../asm/arch/include/'])
+  name = 'analysis_plugin_@0@'.format(p)
+  analysis_plugin_inc = [h_files, platform_inc]
+
+  if p in analysis_enabled_shared_plugins
+    analysis_plugin = shared_library(name, c_files,
+      include_directories: analysis_plugin_inc,
+      dependencies: [rz_analysis_dependencies, analysis_plugin_deps, rz_analysis_dep],
+      install: true,
+      install_dir: rizin_plugins,
+    )
+  endif
+endforeach
