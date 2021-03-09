@@ -308,7 +308,7 @@ RzBinPlugin rz_bin_plugin_mach064 = {
 	.fields = &MACH0_(mach_fields),
 	.create = &create,
 	.classes = &MACH0_(parse_classes),
-	.write = &rz_bin_write_mach0,
+	.write = &rz_bin_write_mach064,
 };
 
 #ifndef RZ_PLUGIN_INCORE
