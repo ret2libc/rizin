@@ -554,6 +554,12 @@ foreach p : analysis_enabled_static_plugins
 endforeach
 analysis_enabled_static_plugins_str += ['0']
 
+bp_enabled_static_plugins_str = []
+foreach p : bp_enabled_static_plugins
+  bp_enabled_static_plugins_str += ['&rz_bp_plugin_' + p]
+endforeach
+bp_enabled_static_plugins_str += ['0']
+
 bin_enabled_static_plugins_str = []
 foreach p : bin_enabled_static_plugins
   bin_enabled_static_plugins_str += ['&rz_bin_plugin_' + p]
@@ -570,7 +576,7 @@ conf_data = configuration_data()
 conf_data.set('plugins_core', '&rz_core_plugin_' + ', &rz_core_plugin_'.join(core_plugins) + ', 0')
 conf_data.set('plugins_analysis', ', '.join(analysis_enabled_static_plugins_str))
 conf_data.set('plugins_asm', ', '.join(asm_enabled_static_plugins_str))
-conf_data.set('plugins_bp', '&rz_bp_plugin_' + ', &rz_bp_plugin_'.join(bp_plugins) + ', 0')
+conf_data.set('plugins_bp', ', '.join(bp_enabled_static_plugins_str))
 conf_data.set('plugins_bin', ', '.join(bin_enabled_static_plugins_str))
 conf_data.set('plugins_bin_xtr', ', '.join(bin_xtr_enabled_static_plugins_str))
 conf_data.set('plugins_crypto', '&rz_crypto_plugin_' + ', &rz_crypto_plugin_'.join(crypto_plugins) + ', 0')
