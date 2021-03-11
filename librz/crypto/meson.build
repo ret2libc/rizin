@@ -17,8 +17,8 @@ crypto_plugins = [
   'xor',
 ]
 
-crypto_enabled_static_plugins = []
-crypto_enabled_shared_plugins = crypto_plugins
+crypto_enabled_static_plugins = crypto_plugins
+crypto_enabled_shared_plugins = []
 
 rz_crypto_dependencies = [
   rz_util_dep,
