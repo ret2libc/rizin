@@ -204,9 +204,6 @@ foreach opt : opts_overwrite
   endif
 endforeach
 
-# load plugin configuration
-subdir('librz')
-
 # handle magic library
 sys_magic = cc.find_library('magic', required: get_option('use_sys_magic'), static: is_static_build)
 
@@ -486,35 +483,10 @@ subdir('librz/util')
 subdir('librz/socket')
 subdir('librz/hash')
 subdir('librz/crypto')
+subdir('librz/cons')
 subdir('shlr')
 
-subdir('librz/cons')
-subdir('shlr/gdb')
-subdir('librz/io')
-subdir('librz/bp')
-subdir('librz/syscall')
-subdir('librz/search')
-subdir('librz/magic')
-subdir('librz/flag')
-subdir('librz/reg')
-subdir('librz/bin')
-subdir('librz/config')
-subdir('librz/parse')
-subdir('librz/lang')
-subdir('librz/asm')
-subdir('librz/analysis')
-subdir('librz/egg')
-subdir('librz/debug')
-subdir('librz/core')
-
-subdir('librz/analysis/d')
-subdir('librz/asm/d')
-subdir('librz/bin/d')
-subdir('librz/syscall/d')
-subdir('librz/cons/d')
-subdir('librz/magic/d')
-subdir('librz/flag/d')
-subdir('librz/main')
+subdir('librz')
 
 cli_option = get_option('cli')
 if cli_option.auto()
