@@ -596,6 +596,12 @@ foreach p : egg_enabled_static_plugins
 endforeach
 egg_enabled_static_plugins_str += ['0']
 
+lang_enabled_static_plugins_str = []
+foreach p : lang_enabled_static_plugins
+  lang_enabled_static_plugins_str += ['&rz_lang_plugin_' + p]
+endforeach
+lang_enabled_static_plugins_str += ['0']
+
 conf_data = configuration_data()
 conf_data.set('plugins_core', '&rz_core_plugin_' + ', &rz_core_plugin_'.join(core_plugins) + ', 0')
 conf_data.set('plugins_analysis', ', '.join(analysis_enabled_static_plugins_str))
@@ -607,7 +613,7 @@ conf_data.set('plugins_crypto', ', '.join(crypto_enabled_static_plugins_str))
 conf_data.set('plugins_io', ', '.join(io_enabled_static_plugins_str))
 conf_data.set('plugins_debug', ', '.join(debug_enabled_static_plugins_str))
 conf_data.set('plugins_egg', ', '.join(egg_enabled_static_plugins_str))
-conf_data.set('plugins_lang', '&rz_lang_plugin_' + ', &rz_lang_plugin_'.join(lang_plugins) + ', 0')
+conf_data.set('plugins_lang', ', '.join(lang_enabled_static_plugins_str))
 conf_data.set('plugins_parse', '&rz_parse_plugin_' + ', &rz_parse_plugin_'.join(parse_plugins) + ', 0')
 config_h = configure_file(
   input: 'librz/config.h.in',
