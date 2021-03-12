@@ -1,3 +1,5 @@
+fs = import('fs')
+
 subdir('include')
 
 # NOTE: Cannot be included here because right now shlr depends on some librz
@@ -9,8 +11,6 @@ subdir('include')
 # subdir('crypto')
 # subdir('cons')
 #
-
-fs = import('fs')
 
 modules = [
     'io',
