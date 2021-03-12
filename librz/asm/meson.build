@@ -46,3 +46,5 @@ pkgconfig_mod.generate(rz_asm,
   ],
   description: 'rizin foundation libraries'
 )
+
+subdir('d')

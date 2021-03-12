@@ -112,8 +112,4 @@ foreach module : modules
       endforeach
     endif
   endif
-
-  if fs.is_dir(module / 'd') and fs.exists(module / 'd' / 'meson.build')
-    subdir(module / 'd')
-  endif
 endforeach

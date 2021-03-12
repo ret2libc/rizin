@@ -583,3 +583,5 @@ foreach p : analysis_plugins
     )
   endif
 endforeach
+
+subdir('d')

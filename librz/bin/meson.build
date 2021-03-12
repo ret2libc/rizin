@@ -485,3 +485,5 @@ foreach p : bin_plugins + bin_xtr_plugins
     )
   endif
 endforeach
+
+subdir('d')
