@@ -1,6 +1,6 @@
 Name:           rizin
 Summary:        UNIX-like reverse engineering framework and command-line tool-set
-Version:        0.3.0
+Version:        0.0.1
 URL:            https://rizin.re/
 VCS:            https://github.com/rizinorg/rizin
 
@@ -9,7 +9,7 @@ VCS:            https://github.com/rizinorg/rizin
 %global         rel             1
 
 Release:        %{rel}%{?dist}
-Source0:        https://github.com/%{gituser}/%{gitname}/releases/download/v%{version}/%{name}-src-v%{version}.tar.xz
+Source0:        %{name}-%{version}.tar.xz
 
 License:        LGPLv3+ and GPLv2+ and BSD and MIT and ASL 2.0 and MPLv2.0 and zlib
 # Rizin as a package is targeting to be licensed/compiled as LGPLv3+
