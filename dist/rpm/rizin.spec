@@ -43,41 +43,6 @@ BuildRequires:  pkgconfig(openssl)
 
 Requires:       %{name}-common = %{version}-%{release}
 
-# Package contains several bundled libraries that are used in Fedora builds
-
-# ./shlr/spp/README.md
-# SPP stands for Simple Pre-Processor, a templating language.
-# https://github.com/rizinorg/spp
-Provides:       bundled(spp) = 1.2.0
-
-# ./shlr/sdb/README.md
-# sdb is a simple string key/value database based on djb's cdb
-# https://github.com/rizinorg/sdb
-Provides:       bundled(sdb) = c9752198549410add2bf220de40e08f018877712
-
-# ./shlr/sdb/src/json/README
-# https://github.com/quartzjer/js0n
-# JSON support for sdb
-Provides:       bundled(js0n)
-
-# librz/util/regex/README
-# Modified OpenBSD regex to be portable
-# cvs -qd anoncvs@anoncvs.ca.openbsd.org:/cvs get -P src/lib/libc/regex
-# version from 2010/11/21 00:02:30, version of files ranges from v1.11 to v1.20
-Provides:       bundled(openbsdregex) = 1.11
-
-# ./librz/asm/arch/tricore/README.md
-# Based on code from https://www.hightec-rt.com/en/downloads/sources/14-sources-for-tricore-v3-3-7-9-binutils-1.html
-# part of binutils to read machine code for Tricore architecture
-# ./librz/asm/arch/ppc/gnu/
-# part of binutils to read machine code for ppc architecture
-# ./librz/asm/arch/arm/gnu/
-Provides:       bundled(binutils) = 2.13
-
-# ./librz/asm/arch/avr/README
-# * This code has been ripped from vavrdisasm 1.6
-Provides:       bundled(vavrdisasm) = 1.6
-
 
 %description
 Rizin is a free and open-source Reverse Engineering framework, providing a
@@ -111,26 +76,18 @@ information
 
 %prep
 # Build from git release version
-%setup -n %{gitname}-v%{version}
+%autosetup
 
 %build
 # Whereever possible use the system-wide libraries instead of bundles
 %meson \
-    -Duse_sys_magic=enabled \
-    -Duse_sys_libzip=enabled \
-    -Duse_sys_zlib=enabled \
-    -Duse_sys_lz4=enabled \
-    -Duse_sys_xxhash=enabled \
-    -Duse_sys_openssl=enabled \
-    -Duse_sys_libuv=enabled \
-    -Duse_sys_capstone=enabled \
 %ifarch s390x
     -Ddebugger=false \
 %endif
     -Denable_tests=false \
     -Denable_rz_test=false \
     -Dlocal=disabled \
-    -Dpackager="Fedora" \
+    -Dpackager="RizinOrg" \
     -Dpackager_version="%{version}-%{release}"
 %meson_build
 
@@ -179,20 +136,5 @@ information
 
 
 %changelog
-* Mon Sep 27 2021 Riccardo Schirone <rschirone91@gmail.com> - 0.3.0-1
-- Rebase to upstream version 0.3.0
-
-* Tue Sep 14 2021 Sahana Prasad <sahana@redhat.com> - 0.2.0-2.2
-- Rebuilt with OpenSSL 3.0.0
-
-* Fri Jul 23 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.2.0-2.1
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Tue Apr 20 2021 Riccardo Schirone <rschirone91@gmail.com> - 0.2.0-2
-- Apply patch to avoid symbols collision
-
-* Mon Apr 12 2021 Riccardo Schirone <rschirone91@gmail.com> - 0.2.0-1
-- Rebase to upstream version 0.2.0
-
-* Tue Mar 30 2021 Riccardo Schirone <rschirone91@gmail.com> - 0.1.2-1
-- Initial SPEC file
+* Mon Sep 27 2021 Riccardo Schirone <rschirone91@gmail.com> - 0.0.5-1
+- Initial spec file from upstream
