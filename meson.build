@@ -728,6 +728,7 @@ summary({
   'Use RPATH': use_rpath,
 }, section: 'Configuration', bool_yn: true)
 
+
 summary({
   'Analysis Plugins': analysis_plugins,
   'Assembler Plugins': asm_plugins,
