@@ -14,7 +14,7 @@ Source0:        https://github.com/%{gituser}/%{gitname}/releases/download/v%{ve
 License:        LGPLv3+ and GPLv2+ and BSD and MIT and ASL 2.0 and MPLv2.0 and zlib
 
 BuildRequires:  gcc
-BuildRequires:  meson >= 0.55.0
+BuildRequires:  meson >= 0.59.0
 %if 0%{?suse_version}
 BuildRequires:  ninja
 %else
