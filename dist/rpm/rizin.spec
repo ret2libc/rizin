@@ -1,15 +1,24 @@
+%define rpm_version 0.4.0
+
 Name:           rizin
 Summary:        UNIX-like reverse engineering framework and command-line tool-set
-Version:        0.3.0
+Version:        %{rpm_version}
+Release:        0%{rel}%{?dist}
 URL:            https://rizin.re/
 VCS:            https://github.com/rizinorg/rizin
 
-%global         gituser         rizinorg
+%global         gituser         ret2libc
 %global         gitname         rizin
+%global         gitbranch       dev
 %global         rel             1
 
-Release:        0%{rel}%{?dist}
+%bcond_with  releasetag
+
+%if %{with releasetag}
 Source0:        https://github.com/%{gituser}/%{gitname}/releases/download/v%{version}/%{name}-src-v%{version}.tar.xz
+%else
+Source0:        https://github.com/%{gituser}/%{gitname}/archive/refs/heads/%{gitbranch}.zip
+%endif
 
 License:        LGPLv3+ and GPLv2+ and BSD and MIT and ASL 2.0 and MPLv2.0 and zlib
 
@@ -56,8 +65,25 @@ information
 
 
 %prep
+%if %{with releasetag}
 # Build from git release version
-%setup -n %{name}-v%{version}
+%setup -n %{gitname}-v%{version}
+%else
+# Build from git commit
+%setup -n %{gitname}-%{gitbranch}
+%__meson subprojects download \
+    libuv \
+    capstone-bundled \
+    libdemangle \
+    libzip \
+    lz4 \
+    sdb \
+    sigdb \
+    tree-sitter-c \
+    tree-sitter \
+    zlib
+%__meson rewrite kwargs set project / version v%{rpm_version}
+%endif
 
 %build
 # Whereever possible use the system-wide libraries instead of bundles
@@ -67,8 +93,7 @@ information
 %endif
     -Duse_sys_libuv=disabled \
     -Duse_libuv=true \
-    -Denable_tests=false \
-    -Denable_rz_test=false \
+    -Dinstall_sigdb=true \
     -Dlocal=disabled \
     -Dpackager="RizinOrg" \
     -Dpackager_version="%{version}-%{release}"
@@ -84,8 +109,7 @@ information
 %endif
 
 %check
-# Do not run the unit testsuite yet - it pulls another big repository
-# https://github.com/rizinorg/rizin-testbins from github
+
 
 %files
 %doc CONTRIBUTING.md DEVELOPERS.md README.md SECURITY.md BUILDING.md
@@ -100,22 +124,23 @@ information
 %{_includedir}/librz
 %{_libdir}/librz*.so
 %{_libdir}/pkgconfig/*.pc
+%{_libdir}/cmake/**/*.cmake
 
 
 %files common
-%{_datadir}/%{name}/%{version}/asm
-%{_datadir}/%{name}/%{version}/cons
-%{_datadir}/%{name}/%{version}/flag
-%{_datadir}/%{name}/%{version}/format
-%{_datadir}/%{name}/%{version}/fortunes
-%{_datadir}/%{name}/%{version}/hud
-%{_datadir}/%{name}/%{version}/magic
-%{_datadir}/%{name}/%{version}/opcodes
-%{_datadir}/%{name}/%{version}/reg
-%{_datadir}/%{name}/%{version}/syscall
-%{_datadir}/%{name}/%{version}/types
+%{_datadir}/%{name}/asm
+%{_datadir}/%{name}/cons
+%{_datadir}/%{name}/flag
+%{_datadir}/%{name}/format
+%{_datadir}/%{name}/fortunes
+%{_datadir}/%{name}/hud
+%{_datadir}/%{name}/magic
+%{_datadir}/%{name}/opcodes
+%{_datadir}/%{name}/reg
+%{_datadir}/%{name}/syscall
+%{_datadir}/%{name}/sigdb
+%{_datadir}/%{name}/types
 %dir %{_datadir}/%{name}
-%dir %{_datadir}/%{name}/%{version}
 
 
 %changelog
