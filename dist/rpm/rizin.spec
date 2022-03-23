@@ -17,7 +17,7 @@ VCS:            https://github.com/rizinorg/rizin
 %if %{with releasetag}
 Source0:        https://github.com/%{gituser}/%{gitname}/releases/download/v%{version}/%{name}-src-v%{version}.tar.xz
 %else
-Source0:        https://github.com/%{gituser}/%{gitname}/archive/refs/heads/%{gitbranch}.zip
+Source0:        https://github.com/%{gituser}/%{gitname}/archive/refs/heads/%{gitbranch}.zip#/%{name}-%{gitbranch}.zip
 %endif
 
 License:        LGPLv3+ and GPLv2+ and BSD and MIT and ASL 2.0 and MPLv2.0 and zlib
