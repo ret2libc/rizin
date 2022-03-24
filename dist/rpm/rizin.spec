@@ -1,24 +1,15 @@
-%define rpm_version 0.4.0
-
 Name:           rizin
 Summary:        UNIX-like reverse engineering framework and command-line tool-set
-Version:        %{rpm_version}
+Version:        0.4.0
 Release:        0%{rel}%{?dist}
 URL:            https://rizin.re/
 VCS:            https://github.com/rizinorg/rizin
 
 %global         gituser         ret2libc
 %global         gitname         rizin
-%global         gitbranch       dev
 %global         rel             1
 
-%bcond_with  releasetag
-
-%if %{with releasetag}
 Source0:        https://github.com/%{gituser}/%{gitname}/releases/download/v%{version}/%{name}-src-v%{version}.tar.xz
-%else
-Source0:        https://github.com/%{gituser}/%{gitname}/archive/refs/heads/%{gitbranch}.zip#/%{name}-%{gitbranch}.zip
-%endif
 
 License:        LGPLv3+ and GPLv2+ and BSD and MIT and ASL 2.0 and MPLv2.0 and zlib
 
@@ -65,25 +56,7 @@ information
 
 
 %prep
-%if %{with releasetag}
-# Build from git release version
 %setup -n %{gitname}-v%{version}
-%else
-# Build from git commit
-%setup -n %{gitname}-%{gitbranch}
-%__meson subprojects download \
-    libuv \
-    capstone-bundled \
-    libdemangle \
-    libzip \
-    lz4 \
-    sdb \
-    sigdb \
-    tree-sitter-c \
-    tree-sitter \
-    zlib
-%__meson rewrite kwargs set project / version v%{rpm_version}
-%endif
 
 %build
 # Whereever possible use the system-wide libraries instead of bundles
@@ -144,5 +117,7 @@ information
 
 
 %changelog
+* Thu Mar 24 2022 Riccardo Schirone <rschirone91@gmail.com> - 0.4.0-1
+- Updates for 0.4.0
 * Mon Sep 27 2021 Riccardo Schirone <rschirone91@gmail.com> - 0.0.5-1
 - Initial spec file from upstream
