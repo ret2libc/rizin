@@ -110,7 +110,6 @@ information
 %{_datadir}/%{name}/opcodes
 %{_datadir}/%{name}/reg
 %{_datadir}/%{name}/syscall
-%{_datadir}/%{name}/sigdb
 %{_datadir}/%{name}/types
 %dir %{_datadir}/%{name}
 
