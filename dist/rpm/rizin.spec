@@ -66,7 +66,6 @@ information
 %endif
     -Duse_sys_libuv=disabled \
     -Duse_libuv=true \
-    -Dinstall_sigdb=true \
     -Dlocal=disabled \
     -Dpackager="RizinOrg" \
     -Dpackager_version="%{version}-%{release}"
