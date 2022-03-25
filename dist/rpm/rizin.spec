@@ -97,6 +97,7 @@ information
 %{_libdir}/librz*.so
 %{_libdir}/pkgconfig/*.pc
 %dir %{_libdir}/cmake/**
+%dir %{_libdir}/cmake
 %{_libdir}/cmake/**/*.cmake
 
 
