@@ -24,6 +24,8 @@ RZ_API ut64 rz_bin_reloc_size(RzBinReloc *reloc) {
 		return 8;
 	case RZ_BIN_RELOC_16:
 		return 16;
+	case RZ_BIN_RELOC_24:
+		return 24;
 	case RZ_BIN_RELOC_32:
 		return 32;
 	case RZ_BIN_RELOC_64:
@@ -224,7 +226,6 @@ static RzList *classes_from_symbols(RzBinFile *bf) {
 			char *dn = sym->dname;
 			char *fn = swiftField(dn, cn);
 			if (fn) {
-				// eprintf ("FIELD %s  %s\n", cn, fn);
 				RzBinField *f = rz_bin_field_new(sym->paddr, sym->vaddr, sym->size, fn, NULL, NULL, false);
 				rz_list_append(c->fields, f);
 				free(fn);
@@ -270,7 +271,7 @@ RZ_IPI RzBinObject *rz_bin_object_new(RzBinFile *bf, RzBinPlugin *plugin, RzBinO
 	if (plugin && plugin->load_buffer) {
 		if (!plugin->load_buffer(bf, o, bf->buf, sdb)) {
 			if (bf->rbin->verbose) {
-				eprintf("Error in rz_bin_object_new: load_buffer failed for %s plugin\n", plugin->name);
+				RZ_LOG_ERROR("rz_bin_object_new: load_buffer failed for %s plugin\n", plugin->name);
 			}
 			sdb_free(o->kv);
 			free(o);
@@ -300,7 +301,7 @@ RZ_IPI RzBinObject *rz_bin_object_new(RzBinFile *bf, RzBinPlugin *plugin, RzBinO
 		// bf->sdb = o->kv;
 		// bf->sdb_info = o->kv;
 		// sdb_ns_set (bf->sdb, "info", o->kv);
-		//sdb_ns (sdb, sdb_fmt ("fd.%d", bf->fd), 1);
+		// sdb_ns (sdb, sdb_fmt ("fd.%d", bf->fd), 1);
 		sdb_set(bf->sdb, "archs", "0:0:x86:32", 0); // x86??
 		/* NOTE */
 		/* Those refs++ are necessary because sdb_ns() doesnt rerefs all
@@ -328,22 +329,22 @@ static void filter_classes(RzBinFile *bf, RzList *list) {
 		}
 		int namepad_len = strlen(cls->name) + 32;
 		char *namepad = malloc(namepad_len + 1);
-		if (namepad) {
-			char *p;
-			strcpy(namepad, cls->name);
-			p = rz_bin_filter_name(bf, db, cls->index, namepad);
-			if (p) {
-				namepad = p;
+		if (!namepad) {
+			RZ_LOG_ERROR("Cannot allocate %d byte(s)\n", namepad_len);
+			break;
+		}
+
+		strcpy(namepad, cls->name);
+		char *p = rz_bin_filter_name(bf, db, cls->index, namepad);
+		if (p) {
+			namepad = p;
+		}
+		free(cls->name);
+		cls->name = namepad;
+		rz_list_foreach (cls->methods, iter2, sym) {
+			if (sym->name) {
+				rz_bin_filter_sym(bf, ht, sym->vaddr, sym);
 			}
-			free(cls->name);
-			cls->name = namepad;
-			rz_list_foreach (cls->methods, iter2, sym) {
-				if (sym->name) {
-					rz_bin_filter_sym(bf, ht, sym->vaddr, sym);
-				}
-			}
-		} else {
-			eprintf("Cannot alloc %d byte(s)\n", namepad_len);
 		}
 	}
 	ht_pu_free(db);
@@ -375,7 +376,6 @@ RZ_API int rz_bin_object_set_items(RzBinFile *bf, RzBinObject *o) {
 	rz_return_val_if_fail(bf && o && o->plugin, false);
 
 	int i;
-	bool isSwift = false;
 	RzBin *bin = bf->rbin;
 	RzBinPlugin *p = o->plugin;
 	int minlen = (bf->rbin->minstrlen > 0) ? bf->rbin->minstrlen : p->minstrlen;
@@ -456,7 +456,6 @@ RZ_API int rz_bin_object_set_items(RzBinFile *bf, RzBinObject *o) {
 			}
 		}
 	}
-	o->info = p->info ? p->info(bf) : NULL;
 	if (p->libs) {
 		o->libs = p->libs(bf);
 	}
@@ -470,6 +469,9 @@ RZ_API int rz_bin_object_set_items(RzBinFile *bf, RzBinObject *o) {
 			rz_bin_filter_sections(bf, o->sections);
 		}
 	}
+
+	o->info = p->info ? p->info(bf) : NULL;
+
 	if (bin->filter_rules & (RZ_BIN_REQ_RELOCS | RZ_BIN_REQ_IMPORTS)) {
 		if (p->relocs) {
 			RzList *l = p->relocs(bf);
@@ -480,14 +482,30 @@ RZ_API int rz_bin_object_set_items(RzBinFile *bf, RzBinObject *o) {
 		}
 	}
 	if (bin->filter_rules & RZ_BIN_REQ_STRINGS) {
-		o->strings = p->strings
-			? p->strings(bf)
-			: rz_bin_file_get_strings(bf, minlen, 0, bf->rawstr);
+		if (p->strings) {
+			o->strings = p->strings(bf);
+		} else {
+			// when a bin plugin does not provide it's own strings
+			// we always take all the strings found in the binary
+			// the method also converts the paddrs to vaddrs
+			o->strings = rz_bin_file_strings(bf, minlen, true);
+		}
 		if (bin->debase64) {
 			rz_bin_object_filter_strings(o);
 		}
 		REBASE_PADDR(o, o->strings, RzBinString);
 	}
+
+	if (o->info && RZ_STR_ISEMPTY(o->info->compiler)) {
+		free(o->info->compiler);
+		o->info->compiler = rz_bin_file_golang_compiler(bf);
+		if (o->info->compiler) {
+			o->info->lang = "go";
+		}
+	}
+
+	o->lang = rz_bin_language_detect(bf);
+
 	if (bin->filter_rules & (RZ_BIN_REQ_CLASSES | RZ_BIN_REQ_CLASSES_SOURCES)) {
 		if (p->classes) {
 			RzList *classes = p->classes(bf);
@@ -497,8 +515,8 @@ RZ_API int rz_bin_object_set_items(RzBinFile *bf, RzBinObject *o) {
 				o->classes = classes;
 				rz_bin_object_rebuild_classes_ht(o);
 			}
-			isSwift = rz_bin_lang_swift(bf);
-			if (isSwift) {
+
+			if (o->lang == RZ_BIN_LANGUAGE_SWIFT) {
 				o->classes = classes_from_symbols(bf);
 			}
 		} else {
@@ -507,9 +525,11 @@ RZ_API int rz_bin_object_set_items(RzBinFile *bf, RzBinObject *o) {
 				o->classes = classes;
 			}
 		}
+
 		if (bin->filter) {
 			filter_classes(bf, o->classes);
 		}
+
 		// cache addr=class+method
 		if (o->classes) {
 			RzList *klasses = o->classes;
@@ -540,7 +560,9 @@ RZ_API int rz_bin_object_set_items(RzBinFile *bf, RzBinObject *o) {
 	if (p->mem) {
 		o->mem = p->mem(bf);
 	}
-	o->lang = isSwift ? RZ_BIN_NM_SWIFT : rz_bin_load_languages(bf);
+	if (p->resources) {
+		o->resources = p->resources(bf);
+	}
 	return true;
 }
 
@@ -637,7 +659,7 @@ RZ_IPI void rz_bin_object_filter_strings(RzBinObject *bo) {
 			if (rz_str_is_printable(dec) && strlen(dec) > 3) {
 				free(ptr->string);
 				ptr->string = dec;
-				ptr->type = RZ_STRING_TYPE_BASE64;
+				ptr->type = RZ_BIN_STRING_ENC_BASE64;
 			} else {
 				free(dec);
 			}
@@ -807,6 +829,14 @@ RZ_API const RzList *rz_bin_object_get_symbols(RzBinObject *obj) {
 }
 
 /**
+ * \brief Get a list of \p RzBinResource representing the resources in the binary object.
+ */
+RZ_API const RzList *rz_bin_object_get_resources(RzBinObject *obj) {
+	rz_return_val_if_fail(obj, NULL);
+	return obj->resources;
+}
+
+/**
  * \brief Remove all previously identified strings in the binary object and scan it again for strings.
  */
 RZ_API const RzList *rz_bin_object_reset_strings(RzBin *bin, RzBinFile *bf, RzBinObject *obj) {
@@ -818,12 +848,14 @@ RZ_API const RzList *rz_bin_object_reset_strings(RzBin *bin, RzBinFile *bf, RzBi
 	ht_up_free(obj->strings_db);
 	obj->strings_db = ht_up_new0();
 
-	bf->rawstr = bin->rawstr;
 	RzBinPlugin *plugin = obj->plugin;
 	if (plugin && plugin->strings) {
 		obj->strings = plugin->strings(bf);
 	} else {
-		obj->strings = rz_bin_file_get_strings(bf, bin->minstrlen, 0, bf->rawstr);
+		// when a bin plugin does not provide it's own strings
+		// we always take all the strings found in the binary
+		// the method also converts the paddrs to vaddrs
+		obj->strings = rz_bin_file_strings(bf, bin->minstrlen, true);
 	}
 	if (bin->debase64) {
 		rz_bin_object_filter_strings(obj);

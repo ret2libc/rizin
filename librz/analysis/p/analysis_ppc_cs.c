@@ -81,7 +81,7 @@ static char *getarg2(struct Getarg *gop, int n, const char *setstr) {
 	switch (op.type) {
 	case PPC_OP_INVALID:
 		words[n][0] = '\0';
-		//strcpy (words[n], "invalid");
+		// strcpy (words[n], "invalid");
 		break;
 	case PPC_OP_REG:
 		snprintf(words[n], sizeof(words[n]),
@@ -207,7 +207,7 @@ static void opex(RzStrBuf *buf, csh handle, cs_insn *insn) {
 #define ARG(n)     getarg2(&gop, n, "")
 #define ARG2(n, m) getarg2(&gop, n, m)
 
-static bool set_reg_profile(RzAnalysis *analysis) {
+static char *get_reg_profile(RzAnalysis *analysis) {
 	const char *p = NULL;
 	if (analysis->bits == 32) {
 		p =
@@ -409,9 +409,9 @@ static bool set_reg_profile(RzAnalysis *analysis) {
 			"gpr	dbat1u .32 468 0\n"
 			"gpr	dbat2u .32 476 0\n"
 			"gpr	dbat3u .32 484 0\n"
-			"gpr	mask   .64 488 0\n"; //not a real register used on complex functions
+			"gpr	mask   .64 488 0\n"; // not a real register used on complex functions
 	}
-	return rz_reg_set_profile_string(analysis->reg, p);
+	return strdup(p);
 }
 
 static int analop_vle(RzAnalysis *a, RzAnalysisOp *op, ut64 addr, const ut8 *buf, int len) {
@@ -421,7 +421,7 @@ static int analop_vle(RzAnalysis *a, RzAnalysisOp *op, ut64 addr, const ut8 *buf
 	if (len > 1 && !vle_init(&handle, buf, len) && (instr = vle_next(&handle))) {
 		op->size = instr->size;
 		op->type = instr->analysis_op;
-		//op->id = instr->type;
+		// op->id = instr->type;
 
 		switch (op->type) {
 		case RZ_ANALYSIS_OP_TYPE_ILL:
@@ -440,7 +440,7 @@ static int analop_vle(RzAnalysis *a, RzAnalysisOp *op, ut64 addr, const ut8 *buf
 			op->fail = addr + op->size;
 			break;
 		case RZ_ANALYSIS_OP_TYPE_CJMP:
-			op->cond = instr->cond; //RZ_TYPE_COND_NE;
+			op->cond = instr->cond; // RZ_TYPE_COND_NE;
 			op->eob = true;
 			op->jump = addr + instr->fields[instr->n - 1].value;
 			op->fail = addr + op->size;
@@ -489,7 +489,7 @@ static int analop_vle(RzAnalysis *a, RzAnalysisOp *op, ut64 addr, const ut8 *buf
 		case RZ_ANALYSIS_OP_TYPE_XOR:
 			break;
 		default:
-			//eprintf ("Missing an RZ_ANALYSIS_OP_TYPE (%"PFMT64u")\n", op->type);
+			// RZ_LOG_ERROR("Missing an RZ_ANALYSIS_OP_TYPE (%"PFMT64u")\n", op->type);
 			break;
 		}
 		vle_free(instr);
@@ -896,6 +896,7 @@ static int analop(RzAnalysis *a, RzAnalysisOp *op, ut64 addr, const ut8 *buf, in
 			break;
 		case PPC_INS_MULLI:
 			op->sign = true;
+			// fallthrough
 		case PPC_INS_MULLW:
 		case PPC_INS_MULLD:
 			op->type = RZ_ANALYSIS_OP_TYPE_MUL;
@@ -1023,7 +1024,7 @@ static int analop(RzAnalysis *a, RzAnalysisOp *op, ut64 addr, const ut8 *buf, in
 				}
 				op->jump = IMM(1);
 				op->fail = addr + op->size;
-				//op->type = RZ_ANALYSIS_OP_TYPE_UJMP;
+				// op->type = RZ_ANALYSIS_OP_TYPE_UJMP;
 			default:
 				break;
 			}
@@ -1283,7 +1284,7 @@ static int analop(RzAnalysis *a, RzAnalysisOp *op, ut64 addr, const ut8 *buf, in
 			rz_strbuf_fini(&op->esil);
 		}
 		cs_free(insn, n);
-		//cs_close (&handle);
+		// cs_close (&handle);
 	}
 	return op->size;
 }
@@ -1312,7 +1313,7 @@ RzAnalysisPlugin rz_analysis_plugin_ppc_cs = {
 	.archinfo = archinfo,
 	.preludes = analysis_preludes,
 	.op = &analop,
-	.set_reg_profile = &set_reg_profile,
+	.get_reg_profile = &get_reg_profile,
 };
 
 #ifndef RZ_PLUGIN_INCORE

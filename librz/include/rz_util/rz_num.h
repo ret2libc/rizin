@@ -23,9 +23,10 @@ typedef enum {
 	RNCPLUS = '+',
 	RNCMINUS = '-',
 	RNCMUL = '*',
+	RNCEXP = 'E',
 	RNCDIV = '/',
 	RNCMOD = '%',
-	//RNCXOR='^', RNCOR='|', RNCAND='&',
+	// RNCXOR='^', RNCOR='|', RNCAND='&',
 	RNCNEG = '~',
 	RNCAND = '&',
 	RNCORR = '|',
@@ -85,7 +86,7 @@ RZ_API void rz_num_minmax_swap_i(int *a, int *b); // XXX this can be a cpp macro
 RZ_API ut64 rz_num_math(RzNum *num, const char *str);
 RZ_API ut64 rz_num_get(RzNum *num, const char *str);
 RZ_API int rz_num_to_bits(char *out, ut64 num);
-RZ_API int rz_num_to_trits(char *out, ut64 num); //Rename this please
+RZ_API int rz_num_to_trits(char *out, ut64 num); // Rename this please
 RZ_API int rz_num_rand(int max);
 RZ_API void rz_num_irand(void);
 RZ_API ut16 rz_num_ntohs(ut16 foo);
@@ -119,6 +120,20 @@ static inline ut64 rz_num_align_delta(ut64 v, ut64 alignment) {
 		return 0;
 	}
 	return alignment - excess;
+}
+
+/**
+ * \brief Get the 64-bit value that has exactly its \p width lowest bits set to 1.
+ * e.g.
+ *     rz_num_bitmask(2) == 0b11
+ *     rz_num_bitmask(3) == 0b111
+ *     ...
+ */
+static inline ut64 rz_num_bitmask(ut8 width) {
+	if (width >= 64) {
+		return 0xffffffffffffffffull;
+	}
+	return (1ull << (ut64)width) - 1;
 }
 
 #define CONVERT_TO_TWO_COMPLEMENT(x) \

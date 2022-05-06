@@ -57,15 +57,15 @@ NAME=ood & om
 FILE=bins/elf/analysis/x86-helloworld-gcc
 ARGS=-d
 CMDS=<<EOF
-om
+oml
 ?e
 ood > /dev/null
-om
+oml
 EOF
 EXPECT=<<EOF
- 1 fd: 3 +0x00000000 0x00000000 - 0x7ffffffffffffffe rwx 
+ 1 fd: 3 +0x00000000 0x00000000 * 0x7ffffffffffffffe rwx 
 
- 1 fd: 4 +0x00000000 0x00000000 - 0x7ffffffffffffffe rwx 
+ 1 fd: 4 +0x00000000 0x00000000 * 0x7ffffffffffffffe rwx 
 EOF
 RUN
 
@@ -73,18 +73,18 @@ NAME=breakpoints after double doo
 FILE=bins/elf/analysis/x86-helloworld-gcc
 ARGS=
 CMDS=<<EOF
-db main
-db main+3
+db @ main
+db @ main+3
 doo > $_
 dc # should hit the first breakpoint
-.dr*
+.drf
 ?v eip-main
 doo > $_
 dc # should hit the first breakpoint
-.dr*
+.drf
 ?v eip-main
 dc # should hit the the second breakpoint
-.dr*
+.drf
 ?v eip-main
 EOF
 EXPECT=<<EOF
@@ -103,6 +103,6 @@ ood
 EOF
 REGEXP_FILTER_ERR=([a-zA-Z-]+\s+)
 EXPECT_ERR=<<EOF
-Process with PID attach File -helloworld-gcc  reopened in read-write mode
+Process with PID File -helloworld-gcc  reopened in read-write mode
 EOF
 RUN

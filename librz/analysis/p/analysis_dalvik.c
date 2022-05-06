@@ -68,7 +68,7 @@ static int dalvik_op(RzAnalysis *analysis, RzAnalysisOp *op, ut64 addr, const ut
 	switch (data[0]) {
 	case 0xca: // rem-float:
 		op->family = RZ_ANALYSIS_OP_FAMILY_FPU;
-		/* pass through */
+		// fallthrough
 	case 0x1b: // const-string/jumbo
 	case 0x14: // const
 	case 0x15: // const
@@ -104,8 +104,8 @@ static int dalvik_op(RzAnalysis *analysis, RzAnalysisOp *op, ut64 addr, const ut
 			}
 		} else {
 			op->type = RZ_ANALYSIS_OP_TYPE_MOV;
-			//op->stackop = RZ_ANALYSIS_STACK_SET;
-			//op->ptr = -vA;
+			// op->stackop = RZ_ANALYSIS_STACK_SET;
+			// op->ptr = -vA;
 			if (mask & RZ_ANALYSIS_OP_MASK_ESIL) {
 				esilprintf(op, "v%d,v%d,=", vA, vB);
 			}
@@ -170,7 +170,7 @@ static int dalvik_op(RzAnalysis *analysis, RzAnalysisOp *op, ut64 addr, const ut
 	case 0x88: // float-to-long
 	case 0x86: // long-to-double
 		op->family = RZ_ANALYSIS_OP_FAMILY_FPU;
-		/* pass through */
+		// fallthrough
 	case 0x81: // int-to-long
 	case 0x82: // int-to-float
 	case 0x85: // long-to-float
@@ -212,35 +212,35 @@ static int dalvik_op(RzAnalysis *analysis, RzAnalysisOp *op, ut64 addr, const ut
 		op->datatype = RZ_ANALYSIS_DATATYPE_ARRAY;
 		break;
 	case 0x44: // aget
-	case 0x45: //aget-bool
+	case 0x45: // aget-bool
 	case 0x46:
-	case 0x47: //aget-bool
-	case 0x48: //aget-byte
-	case 0x49: //aget-char
-	case 0x4a: //aget-short
-	case 0x52: //iget
-	case 0x58: //iget-short
-	case 0x53: //iget-wide
-	case 0x56: //iget-byte
-	case 0x57: //iget-char
-	case 0xea: //sget-wide-volatile
-	case 0xf4: //iget-byte
-	case 0x66: //sget-short
-	case 0xfd: //sget-object
-	case 0x55: //iget-bool
+	case 0x47: // aget-bool
+	case 0x48: // aget-byte
+	case 0x49: // aget-char
+	case 0x4a: // aget-short
+	case 0x52: // iget
+	case 0x58: // iget-short
+	case 0x53: // iget-wide
+	case 0x56: // iget-byte
+	case 0x57: // iget-char
+	case 0xea: // sget-wide-volatile
+	case 0xf4: // iget-byte
+	case 0x66: // sget-short
+	case 0xfd: // sget-object
+	case 0x55: // iget-bool
 	case 0x60: // sget
 	case 0x61: //
 	case 0x64: // sget-byte
 	case 0x65: // sget-char
-	case 0xe3: //iget-volatile
+	case 0xe3: // iget-volatile
 	case 0xe4: //
 	case 0xe5: // sget
 	case 0xe6: // sget
 	case 0xe7: // iget-object-volatile
-	case 0xe8: //iget-bool
-	case 0xf3: //iget-bool
-	case 0xf8: //iget-bool
-	case 0xf2: //iget-quick
+	case 0xe8: // iget-bool
+	case 0xf3: // iget-bool
+	case 0xf8: // iget-bool
+	case 0xf2: // iget-quick
 		op->type = RZ_ANALYSIS_OP_TYPE_LOAD;
 		break;
 	case 0x54: // iget-object
@@ -274,28 +274,28 @@ static int dalvik_op(RzAnalysis *analysis, RzAnalysisOp *op, ut64 addr, const ut
 			esilprintf(op, "%" PFMT64d ",v%d,=", op->ptr, vA);
 		}
 	} break;
-	case 0x6b: //sput-byte
-	case 0x6d: //sput-short
-	case 0xeb: //sput-wide-volatile
-	case 0x4b: //aput
-	case 0x4c: //aput-wide
+	case 0x6b: // sput-byte
+	case 0x6d: // sput-short
+	case 0xeb: // sput-wide-volatile
+	case 0x4b: // aput
+	case 0x4c: // aput-wide
 	case 0x4d: // aput-object
 	case 0x4e: // aput-bool
 	case 0x4f: //
-	case 0x5e: //iput-char
-	case 0xfc: //iput-object-volatile
-	case 0xf5: //iput-quick
-	case 0x5c: //iput-bool
-	case 0x69: //sput-object
-	case 0x5f: //iput-wide
-	case 0xe9: //iput-wide-volatile
-	case 0xf6: //iput-wide
-	case 0xf7: //iput-wide
-	case 0x67: //iput-wide
-	case 0x59: //iput-wide
-	case 0x5a: //iput-wide
-	case 0x5b: //iput-wide
-	case 0x5d: //iput-wide
+	case 0x5e: // iput-char
+	case 0xfc: // iput-object-volatile
+	case 0xf5: // iput-quick
+	case 0x5c: // iput-bool
+	case 0x69: // sput-object
+	case 0x5f: // iput-wide
+	case 0xe9: // iput-wide-volatile
+	case 0xf6: // iput-wide
+	case 0xf7: // iput-wide
+	case 0x67: // iput-wide
+	case 0x59: // iput-wide
+	case 0x5a: // iput-wide
+	case 0x5b: // iput-wide
+	case 0x5d: // iput-wide
 	case 0x50: //
 	case 0x51: // aput-short
 	case 0x68: // sput-wide
@@ -355,7 +355,7 @@ static int dalvik_op(RzAnalysis *analysis, RzAnalysisOp *op, ut64 addr, const ut
 	case 0xcf: // rem-double
 	case 0xaf: // rem-double
 		op->family = RZ_ANALYSIS_OP_FAMILY_FPU;
-		/* pass through */
+		// fallthrough
 	case 0xb4: // rem-int/2addr
 	case 0xdc: // rem-int/lit8
 	case 0xd4: // rem-int
@@ -381,7 +381,7 @@ static int dalvik_op(RzAnalysis *analysis, RzAnalysisOp *op, ut64 addr, const ut
 		break;
 	case 0xc9: // div-float
 		op->family = RZ_ANALYSIS_OP_FAMILY_FPU;
-		/* pass through */
+		// fallthrough
 	case 0x93: // div-int
 	case 0xd3: // div-int/lit16
 	case 0xdb: // div-int/lit8
@@ -400,7 +400,7 @@ static int dalvik_op(RzAnalysis *analysis, RzAnalysisOp *op, ut64 addr, const ut
 	case 0xf1: // return-void-barrier
 		op->type = RZ_ANALYSIS_OP_TYPE_RET;
 		op->eob = true;
-		//TODO: handle return if(0x0e) {} else {}
+		// TODO: handle return if(0x0e) {} else {}
 		if (mask & RZ_ANALYSIS_OP_MASK_ESIL) {
 			if (data[0] == 0x0e) { // return-void
 				esilprintf(op, "sp,[8],ip,=,8,sp,+=");
@@ -468,7 +468,7 @@ static int dalvik_op(RzAnalysis *analysis, RzAnalysisOp *op, ut64 addr, const ut
 	case 0x36: // if-gt
 	case 0x37: // if-le
 		op->type = RZ_ANALYSIS_OP_TYPE_CJMP;
-		//XXX fix this better the check is to avoid an oob
+		// XXX fix this better the check is to avoid an oob
 		if (len > 2) {
 			op->jump = addr + (len > 3 ? (short)(data[2] | data[3] << 8) * 2 : 0);
 			op->fail = addr + sz;
@@ -488,7 +488,7 @@ static int dalvik_op(RzAnalysis *analysis, RzAnalysisOp *op, ut64 addr, const ut
 	case 0x3c: // if-gtz
 	case 0x3d: // if-lez
 		op->type = RZ_ANALYSIS_OP_TYPE_CJMP;
-		//XXX fix this better the check is to avoid an oob
+		// XXX fix this better the check is to avoid an oob
 		if (len > 2) {
 			op->jump = addr + (len > 3 ? (short)(data[2] | data[3] << 8) * 2 : 0);
 			op->fail = addr + sz;
@@ -533,12 +533,10 @@ static int dalvik_op(RzAnalysis *analysis, RzAnalysisOp *op, ut64 addr, const ut
 	case 0xb7: // invokespecial
 	case 0xb6: // invokevirtual
 	case 0x6e: // invoke-virtual
-		if (len > 2) {
-			//XXX fix this better since the check avoid an oob
-			//but the jump will be incorrect
-			ut32 vB = len > 3 ? (data[3] << 8) | data[2] : 0;
+		if (len > 3) {
+			ut32 vB = (data[3] << 8) | data[2];
 			ut64 dst = analysis->binb.get_offset(analysis->binb.bin, 'm', vB);
-			if (dst == 0) {
+			if (dst == UT64_MAX) {
 				op->type = RZ_ANALYSIS_OP_TYPE_UCALL;
 			} else {
 				op->type = RZ_ANALYSIS_OP_TYPE_CALL;
@@ -546,7 +544,6 @@ static int dalvik_op(RzAnalysis *analysis, RzAnalysisOp *op, ut64 addr, const ut
 			}
 			op->fail = addr + sz;
 			if (mask & RZ_ANALYSIS_OP_MASK_ESIL) {
-				// TODO: handle /range instructions
 				esilprintf(op, "8,sp,-=,0x%" PFMT64x ",sp,=[8],0x%" PFMT64x ",ip,=", op->fail, op->jump);
 			}
 		}
@@ -559,20 +556,21 @@ static int dalvik_op(RzAnalysis *analysis, RzAnalysisOp *op, ut64 addr, const ut
 	case 0x75: // invoke-super/range
 	case 0x76: // invoke-direct/range
 	case 0xfa: // invoke-super-quick // invoke-polymorphic
-		if (len > 2) {
-			//XXX fix this better since the check avoid an oob
-			//but the jump will be incorrect
-			// ut32 vB = len > 3?(data[3] << 8) | data[2] : 3;
-			//op->jump = analysis->binb.get_offset (analysis->binb.bin, 'm', vB);
+		if (len > 3) {
+			ut32 vB = (data[3] << 8) | data[2];
+			ut64 dst = analysis->binb.get_offset(analysis->binb.bin, 'm', vB);
 			op->fail = addr + sz;
-			// op->type = RZ_ANALYSIS_OP_TYPE_CALL;
-			op->type = RZ_ANALYSIS_OP_TYPE_UCALL;
-			// TODO: handle /range instructions
-			// NOP esilprintf (op, "8,sp,-=,0x%"PFMT64x",sp,=[8],0x%"PFMT64x",ip,=", addr);
-		}
-		if (mask & RZ_ANALYSIS_OP_MASK_ESIL) {
-			// TODO: handle /range instructions
-			esilprintf(op, "8,sp,-=,0x%" PFMT64x ",sp,=[8],0x%" PFMT64x ",ip,=", op->fail, op->jump);
+			if (dst == UT64_MAX) {
+				op->type = RZ_ANALYSIS_OP_TYPE_UCALL;
+			} else {
+				op->type = RZ_ANALYSIS_OP_TYPE_CALL;
+				op->jump = dst;
+				if (mask & RZ_ANALYSIS_OP_MASK_ESIL) {
+					esilprintf(op, "8,sp,-=,0x%" PFMT64x ",sp,=[8],0x%" PFMT64x ",ip,=", op->fail, op->jump);
+				}
+			}
+		} else {
+			rz_warn_if_reached();
 		}
 		break;
 	case 0x27: // throw
@@ -619,7 +617,7 @@ static int dalvik_op(RzAnalysis *analysis, RzAnalysisOp *op, ut64 addr, const ut
 		op->type = RZ_ANALYSIS_OP_TYPE_NEW;
 		// 0x1c, 0x1f, 0x22
 		if (len > 2) {
-			//int vA = (int) data[1];
+			// int vA = (int) data[1];
 			int vB = (data[3] << 8) | data[2];
 			// resolve class name for vB
 			ut64 off = RZ_ANALYSIS_GET_OFFSET(analysis, 't', vB);
@@ -656,9 +654,9 @@ static int dalvik_op(RzAnalysis *analysis, RzAnalysisOp *op, ut64 addr, const ut
 	case 0xc7:
 	case 0xbc:
 	case 0x91:
-	case 0xb1: //sub-int/2addr
-	case 0xd1: //sub-int/2addr
-	case 0x9c: //sub-long
+	case 0xb1: // sub-int/2addr
+	case 0xd1: // sub-int/2addr
+	case 0x9c: // sub-long
 		op->type = RZ_ANALYSIS_OP_TYPE_SUB;
 		if (mask & RZ_ANALYSIS_OP_MASK_ESIL) {
 			esilprintf(op, "v%d,v%d,-,v%d,=", vC, vB, vA);
@@ -689,8 +687,8 @@ static int dalvik_op(RzAnalysis *analysis, RzAnalysisOp *op, ut64 addr, const ut
 			op->val = vC;
 		}
 		break;
-	case 0xe0: //lshl
-	case 0xc3: //lshl
+	case 0xe0: // lshl
+	case 0xc3: // lshl
 	case 0xa3: // shl-long
 	case 0x98: // shl-long
 	case 0xb8: // shl-int/2addr
@@ -700,7 +698,7 @@ static int dalvik_op(RzAnalysis *analysis, RzAnalysisOp *op, ut64 addr, const ut
 	return sz;
 }
 
-static bool set_reg_profile(RzAnalysis *analysis) {
+static char *get_reg_profile(RzAnalysis *analysis) {
 	const char *p =
 		"=PC	ip\n"
 		"=SP	sp\n"
@@ -748,15 +746,16 @@ static bool set_reg_profile(RzAnalysis *analysis) {
 		"gpr	ip	.32	116	0\n"
 		"gpr	sp	.32	120	0\n"
 		"gpr	bp	.32	124	0\n";
-	return rz_reg_set_profile_string(analysis->reg, p);
+	return strdup(p);
 }
 
 RzAnalysisPlugin rz_analysis_plugin_dalvik = {
 	.name = "dalvik",
 	.arch = "dalvik",
-	.set_reg_profile = &set_reg_profile,
+	.get_reg_profile = &get_reg_profile,
 	.license = "LGPL3",
 	.bits = 32,
+	.esil = false,
 	.desc = "Dalvik (Android VM) bytecode analysis plugin",
 	.op = &dalvik_op,
 };
