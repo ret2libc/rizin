@@ -4,7 +4,7 @@ Version:        0.3.0
 URL:            https://rizin.re/
 VCS:            https://github.com/rizinorg/rizin
 
-%global         gituser         rizinorg
+%global         gituser         ret2libc
 %global         gitname         rizin
 %global         rel             1
 
