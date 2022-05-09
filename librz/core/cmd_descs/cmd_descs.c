@@ -283,6 +283,7 @@ static const RzCmdDescArg cmd_debug_set_cond_bp_win_args[3];
 static const RzCmdDescArg cmd_debug_continue_execution_args[2];
 static const RzCmdDescArg cmd_debug_continue_send_signal_args[3];
 static const RzCmdDescArg cmd_debug_continue_traptrace_args[2];
+static const RzCmdDescArg cmd_debug_process_profile_args[2];
 static const RzCmdDescArg cmd_debug_step_args[2];
 static const RzCmdDescArg cmd_debug_step_back_args[2];
 static const RzCmdDescArg cmd_debug_step_cond_args[2];
@@ -6175,6 +6176,40 @@ static const RzCmdDescHelp cmd_debug_continue_until_help = {
 	.summary = "Debug continue until",
 };
 
+static const RzCmdDescHelp do_help = {
+	.summary = "Debug (re)open commands",
+};
+static const RzCmdDescArg cmd_debug_process_profile_args[] = {
+	{
+		.name = "key=val",
+		.type = RZ_CMD_ARG_TYPE_EVAL_FULL,
+		.flags = RZ_CMD_ARG_FLAG_ARRAY,
+
+	},
+	{ 0 },
+};
+static const RzCmdDescHelp cmd_debug_process_profile_help = {
+	.summary = "Set rz-run profile options (e dbg.profile)",
+	.args_str = " [<key>=<val> [<key>=<val> ...]]",
+	.args = cmd_debug_process_profile_args,
+};
+
+static const RzCmdDescArg cmd_debug_process_profile_edit_args[] = {
+	{ 0 },
+};
+static const RzCmdDescHelp cmd_debug_process_profile_edit_help = {
+	.summary = "Edit rz-run startup profile with $EDITOR",
+	.args = cmd_debug_process_profile_edit_args,
+};
+
+static const RzCmdDescArg cmd_debug_process_close_args[] = {
+	{ 0 },
+};
+static const RzCmdDescHelp cmd_debug_process_close_help = {
+	.summary = "Close debug session",
+	.args = cmd_debug_process_close_args,
+};
+
 static const RzCmdDescHelp ds_help = {
 	.summary = "Debug step commands",
 };
@@ -8872,6 +8907,14 @@ static const RzCmdDescArg cmd_info_segments_args[] = {
 static const RzCmdDescHelp cmd_info_segments_help = {
 	.summary = "List segments",
 	.args = cmd_info_segments_args,
+};
+
+static const RzCmdDescArg cmd_info_cur_segment_args[] = {
+	{ 0 },
+};
+static const RzCmdDescHelp cmd_info_cur_segment_help = {
+	.summary = "Current segment",
+	.args = cmd_info_cur_segment_args,
 };
 
 static const RzCmdDescArg cmd_info_hashes_args[] = {
@@ -15111,6 +15154,17 @@ RZ_IPI void rzshell_cmddescs_init(RzCore *core) {
 	RzCmdDesc *cmd_debug_continue_until_cd = rz_cmd_desc_oldinput_new(core->rcmd, dc_cd, "dcu", rz_cmd_debug_continue_until, &cmd_debug_continue_until_help);
 	rz_warn_if_fail(cmd_debug_continue_until_cd);
 
+	RzCmdDesc *do_cd = rz_cmd_desc_group_new(core->rcmd, cmd_debug_cd, "do", NULL, NULL, &do_help);
+	rz_warn_if_fail(do_cd);
+	RzCmdDesc *cmd_debug_process_profile_cd = rz_cmd_desc_argv_new(core->rcmd, do_cd, "dor", rz_cmd_debug_process_profile_handler, &cmd_debug_process_profile_help);
+	rz_warn_if_fail(cmd_debug_process_profile_cd);
+
+	RzCmdDesc *cmd_debug_process_profile_edit_cd = rz_cmd_desc_argv_new(core->rcmd, do_cd, "doe", rz_cmd_debug_process_profile_edit_handler, &cmd_debug_process_profile_edit_help);
+	rz_warn_if_fail(cmd_debug_process_profile_edit_cd);
+
+	RzCmdDesc *cmd_debug_process_close_cd = rz_cmd_desc_argv_new(core->rcmd, do_cd, "doc", rz_cmd_debug_process_close_handler, &cmd_debug_process_close_help);
+	rz_warn_if_fail(cmd_debug_process_close_cd);
+
 	RzCmdDesc *ds_cd = rz_cmd_desc_group_new(core->rcmd, cmd_debug_cd, "ds", rz_cmd_debug_step_handler, &cmd_debug_step_help, &ds_help);
 	rz_warn_if_fail(ds_cd);
 	RzCmdDesc *cmd_debug_step_back_cd = rz_cmd_desc_argv_new(core->rcmd, ds_cd, "dsb", rz_cmd_debug_step_back_handler, &cmd_debug_step_back_help);
@@ -15739,6 +15793,10 @@ RZ_IPI void rzshell_cmddescs_init(RzCore *core) {
 	RzCmdDesc *cmd_info_segments_cd = rz_cmd_desc_argv_state_new(core->rcmd, i_cd, "iSS", RZ_OUTPUT_MODE_TABLE | RZ_OUTPUT_MODE_JSON, rz_cmd_info_segments_handler, &cmd_info_segments_help);
 	rz_warn_if_fail(cmd_info_segments_cd);
 	rz_cmd_desc_set_default_mode(cmd_info_segments_cd, RZ_OUTPUT_MODE_TABLE);
+
+	RzCmdDesc *cmd_info_cur_segment_cd = rz_cmd_desc_argv_state_new(core->rcmd, i_cd, "iSS.", RZ_OUTPUT_MODE_TABLE | RZ_OUTPUT_MODE_JSON, rz_cmd_info_cur_segment_handler, &cmd_info_cur_segment_help);
+	rz_warn_if_fail(cmd_info_cur_segment_cd);
+	rz_cmd_desc_set_default_mode(cmd_info_cur_segment_cd, RZ_OUTPUT_MODE_TABLE);
 
 	RzCmdDesc *cmd_info_hashes_cd = rz_cmd_desc_argv_state_new(core->rcmd, i_cd, "it", RZ_OUTPUT_MODE_STANDARD | RZ_OUTPUT_MODE_JSON, rz_cmd_info_hashes_handler, &cmd_info_hashes_help);
 	rz_warn_if_fail(cmd_info_hashes_cd);

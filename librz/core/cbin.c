@@ -2508,6 +2508,14 @@ RZ_API bool rz_core_bin_cur_section_print(RzCore *core, RzBinFile *bf, RzCmdStat
 	return rz_core_bin_sections_print(core, bf, state, &filter, hashes);
 }
 
+RZ_API bool rz_core_bin_cur_segment_print(RzCore *core, RzBinFile *bf, RzCmdStateOutput *state, RzList *hashes) {
+	rz_return_val_if_fail(core && bf && state, false);
+
+	RzCoreBinFilter filter = { 0 };
+	filter.offset = core->offset;
+	return rz_core_bin_segments_print(core, bf, state, &filter, hashes);
+}
+
 RZ_API bool rz_core_bin_basefind_print(RzCore *core, ut32 pointer_size, RzCmdStateOutput *state) {
 	rz_return_val_if_fail(core && state, false);
 	RzListIter *it = NULL;
@@ -2612,6 +2620,7 @@ static bool strings_print(RzCore *core, RzCmdStateOutput *state, const RzList *l
 	RzBinString b64 = { 0 };
 	rz_list_foreach (list, iter, string) {
 		const char *section_name, *type_string;
+		char quiet_val[20];
 		ut64 paddr, vaddr;
 		paddr = string->paddr;
 		vaddr = obj ? rva(obj, paddr, string->vaddr, va) : paddr;
@@ -2743,7 +2752,12 @@ static bool strings_print(RzCore *core, RzCmdStateOutput *state, const RzList *l
 			break;
 		}
 		case RZ_OUTPUT_MODE_QUIET:
-			rz_cons_printf("0x%" PFMT64x " %d %d %s\n", vaddr,
+			if (vaddr == UT64_MAX) {
+				rz_strf(quiet_val, "----------");
+			} else {
+				rz_strf(quiet_val, "0x%" PFMT64x, vaddr);
+			}
+			rz_cons_printf("%s %d %d %s\n", quiet_val,
 				string->size, string->length, escaped_string);
 			break;
 		case RZ_OUTPUT_MODE_QUIETEST:
