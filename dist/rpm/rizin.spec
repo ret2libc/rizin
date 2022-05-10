@@ -101,6 +101,8 @@ information
 %{_libdir}/librz*.so
 %{_libdir}/pkgconfig/*.pc
 %{_libdir}/cmake/**/*.cmake
+%dir %{_libdir}/cmake
+%dir %{_libdir}/cmake/**
 
 
 %files common
