@@ -965,15 +965,15 @@ jobs:
       - uses: actions/download-artifact@v3
       - name: Rename artifacts for release
         run: >
-          mv ./rizin-src.tar.xz/rizin-src.tar.xz rizin-src-${{ steps.extract_version.outputs.branch }}.tar.xz
-          mv ./rizin-static.tar.xz/rizin-static.tar.xz rizin-${{ steps.extract_version.outputs.branch }}-static-x86_64.tar.xz
-          mv ./rizin-android-x86_64/rizin-android-x86_64.tar.gz rizin-${{ steps.extract_version.outputs.branch }}-android-x86_64.tar.gz
-          mv ./rizin-android-arm/rizin-android-arm.tar.gz rizin-${{ steps.extract_version.outputs.branch }}-android-arm.tar.gz
-          mv ./rizin-android-aarch64/rizin-android-aarch64.tar.gz rizin-${{ steps.extract_version.outputs.branch }}-android-aarch64.tar.gz
-          mv ./rizin.pkg/rizin.pkg rizin-macos-${{ steps.extract_version.outputs.branch }}.pkg
-          mv ./rizin-vs2019_static-${{ steps.extract_version.outputs.branch }}.zip/rizin-vs2019_static-${{ steps.extract_version.outputs.branch }}.zip rizin-windows-static-${{ steps.extract_version.outputs.branch }}.zip
-          mv ./rizin-clang_cl-${{ steps.extract_version.outputs.branch }}.zip/rizin-clang_cl-${{ steps.extract_version.outputs.branch }}.zip rizin-windows-shared64-${{ steps.extract_version.outputs.branch }}.zip
-          mv ./rizin_installer-clang_cl-${{ steps.extract_version.outputs.branch }}/rizin.exe rizin_installer-${{ steps.extract_version.outputs.branch }}-x86_64.exe
+          mv ./rizin-src.tar.xz/rizin-src.tar.xz rizin-src-${{ steps.extract_version.outputs.branch }}.tar.xz && \
+          mv ./rizin-static.tar.xz/rizin-static.tar.xz rizin-${{ steps.extract_version.outputs.branch }}-static-x86_64.tar.xz && \
+          mv ./rizin-android-x86_64/rizin-android-x86_64.tar.gz rizin-${{ steps.extract_version.outputs.branch }}-android-x86_64.tar.gz && \
+          mv ./rizin-android-arm/rizin-android-arm.tar.gz rizin-${{ steps.extract_version.outputs.branch }}-android-arm.tar.gz && \
+          mv ./rizin-android-aarch64/rizin-android-aarch64.tar.gz rizin-${{ steps.extract_version.outputs.branch }}-android-aarch64.tar.gz && \
+          mv ./rizin.pkg/rizin.pkg rizin-macos-${{ steps.extract_version.outputs.branch }}.pkg && \
+          mv ./rizin-vs2019_static-${{ steps.extract_version.outputs.branch }}.zip/rizin-vs2019_static-${{ steps.extract_version.outputs.branch }}.zip rizin-windows-static-${{ steps.extract_version.outputs.branch }}.zip && \
+          mv ./rizin-clang_cl-${{ steps.extract_version.outputs.branch }}.zip/rizin-clang_cl-${{ steps.extract_version.outputs.branch }}.zip rizin-windows-shared64-${{ steps.extract_version.outputs.branch }}.zip && \
+          mv ./rizin_installer-clang_cl-${{ steps.extract_version.outputs.branch }}/rizin.exe rizin_installer-${{ steps.extract_version.outputs.branch }}-x86_64.exe && \
           mv ./rizin_installer-clang_cl_x86-${{ steps.extract_version.outputs.branch }}/rizin.exe rizin_installer-${{ steps.extract_version.outputs.branch }}-x86.exe
       - name: Create Release
         id: create_release
