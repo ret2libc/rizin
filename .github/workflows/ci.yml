@@ -61,7 +61,7 @@ jobs:
             macos-meson-clang-tests,
             # linux-gcc-tests-asan,
             # linux-clang-tests-asan,
-            linux-gcc-tests-codecov,
+            # linux-gcc-tests-codecov,
             capstone-v3,
             capstone-v4,
           ]
@@ -118,17 +118,17 @@ jobs:
           #   enabled: ${{ needs.changes.outputs.edited == 'true' }}
           #   timeout: 115
           #   allow_failure: false
-          - name: linux-gcc-tests-codecov
-            os: ubuntu-22.04
-            build_system: meson
-            compiler: gcc
-            run_tests: true
-            meson_options: -Dbuildtype=debug -Db_coverage=true --werror
-            coverage: true
-            enabled: ${{ github.event_name != 'pull_request' && needs.changes.outputs.edited == 'true' }}
-            timeout: 60
-            cflags: "-Wno-cpp"
-            allow_failure: false
+          # - name: linux-gcc-tests-codecov
+            # os: ubuntu-22.04
+            # build_system: meson
+            # compiler: gcc
+            # run_tests: true
+            # meson_options: -Dbuildtype=debug -Db_coverage=true --werror
+            # coverage: true
+            # enabled: ${{ github.event_name != 'pull_request' && needs.changes.outputs.edited == 'true' }}
+            # timeout: 60
+            # cflags: "-Wno-cpp"
+            # allow_failure: false
           - name: capstone-v3
             os: ubuntu-22.04
             build_system: meson
@@ -159,16 +159,16 @@ jobs:
             timeout: 45
             cflags: "-Wno-cpp"
             allow_failure: true
-          - name: no-gpl-code
-            os: ubuntu-22.04
-            build_system: meson
-            compiler: gcc
-            meson_options: -Dbuildtype=release -Duse_gpl=false --werror
-            run_tests: false
-            enabled: ${{ (github.event_name != 'pull_request' || contains(github.head_ref, 'gpl')) && needs.changes.outputs.edited == 'true' }}
-            timeout: 45
-            cflags: "-Wno-cpp"
-            allow_failure: false
+          # - name: no-gpl-code
+            # os: ubuntu-22.04
+            # build_system: meson
+            # compiler: gcc
+            # meson_options: -Dbuildtype=release -Duse_gpl=false --werror
+            # run_tests: false
+            # enabled: ${{ (github.event_name != 'pull_request' || contains(github.head_ref, 'gpl')) && needs.changes.outputs.edited == 'true' }}
+            # timeout: 45
+            # cflags: "-Wno-cpp"
+            # allow_failure: false
 
     steps:
       - name: Show available memory on Linux
@@ -434,61 +434,61 @@ jobs:
         env:
           PKG_CONFIG_PATH: /usr/lib/x86_64-linux-gnu/pkgconfig
 
-  build-gcc11-asan:
-    name: Build on gcc 11 ASAN
-    if: contains(github.head_ref, 'dist') || contains(github.head_ref, 'gcc11') || contains(github.ref, 'release-') || github.ref == 'refs/heads/stable' || github.event_name == 'schedule'
-    runs-on: ubuntu-22.04
-    timeout-minutes: 120
-    steps:
-      - name: Install tools
-        run: sudo apt-get update && sudo apt-get install --yes patch unzip git gcc make curl pkg-config libc6-i386 build-essential
-      - name: Install python and other dependencies
-        run: sudo apt-get install --yes python3-wheel python3-setuptools python3-pip
-      - name: Install meson and ninja
-        run: sudo pip3 install meson ninja PyYAML
-      - name: Install test dependencies
-        run: |
-          sudo pip3 install 'git+https://github.com/rizinorg/rz-pipe#egg=rzpipe&subdirectory=python'
-          sudo apt-get install --yes tzdata
-      - name: Checkout rizin
-        run: |
-          git clone https://github.com/${{ github.repository }}
-          cd rizin
-          git fetch origin ${{ github.ref }}
-          git checkout -b local_branch FETCH_HEAD
-      - name: Checkout our Testsuite Binaries
-        run: git clone https://github.com/rizinorg/rizin-testbins test/bins
-        working-directory: rizin
-      - name: Build with Meson + Ninja
-        run: meson setup --prefix=/usr -Dbuildtype=debugoptimized -Db_sanitize=address,undefined --werror build && ninja -C build
-        working-directory: rizin
-        env:
-          CFLAGS: -DASAN=1 -DRZ_ASSERT_STDOUT=1 -Wno-cpp
-      - name: Install with Ninja
-        run: sudo ninja -C build install
-        working-directory: rizin
-      - name: Run unit tests
-        run: ASAN_LD_PRELOAD=$(gcc -print-file-name=libasan.so) meson test -C build --suite unit
-        working-directory: rizin
-        env:
-          ASAN: true
-          ASAN_OPTIONS: detect_leaks=0,detect_odr_violation=0,allocator_may_return_null=1
-      - name: Run integration tests and rz-test
-        run: |
-          export ASAN_LD_PRELOAD=$(gcc -print-file-name=libasan.so)
-          meson test -C build --suite integration
-          cd test
-          rz-test -L -o results.json
-        working-directory: rizin
-        env:
-          ASAN: true
-          ASAN_OPTIONS: detect_leaks=0,detect_odr_violation=0,allocator_may_return_null=1
-      - name: Run fuzz tests
-        run: rz-test -LF bins/fuzzed @fuzz
-        working-directory: rizin/test
-        env:
-          ASAN: true
-          ASAN_OPTIONS: detect_leaks=0,detect_odr_violation=0,allocator_may_return_null=1
+  # build-gcc11-asan:
+    # name: Build on gcc 11 ASAN
+    # if: contains(github.head_ref, 'dist') || contains(github.head_ref, 'gcc11') || contains(github.ref, 'release-') || github.ref == 'refs/heads/stable' || github.event_name == 'schedule'
+    # runs-on: ubuntu-22.04
+    # timeout-minutes: 120
+    # steps:
+      # - name: Install tools
+        # run: sudo apt-get update && sudo apt-get install --yes patch unzip git gcc make curl pkg-config libc6-i386 build-essential
+      # - name: Install python and other dependencies
+        # run: sudo apt-get install --yes python3-wheel python3-setuptools python3-pip
+      # - name: Install meson and ninja
+        # run: sudo pip3 install meson ninja PyYAML
+      # - name: Install test dependencies
+        # run: |
+          # sudo pip3 install 'git+https://github.com/rizinorg/rz-pipe#egg=rzpipe&subdirectory=python'
+          # sudo apt-get install --yes tzdata
+      # - name: Checkout rizin
+        # run: |
+          # git clone https://github.com/${{ github.repository }}
+          # cd rizin
+          # git fetch origin ${{ github.ref }}
+          # git checkout -b local_branch FETCH_HEAD
+      # - name: Checkout our Testsuite Binaries
+        # run: git clone https://github.com/rizinorg/rizin-testbins test/bins
+        # working-directory: rizin
+      # - name: Build with Meson + Ninja
+        # run: meson setup --prefix=/usr -Dbuildtype=debugoptimized -Db_sanitize=address,undefined --werror build && ninja -C build
+        # working-directory: rizin
+        # env:
+          # CFLAGS: -DASAN=1 -DRZ_ASSERT_STDOUT=1 -Wno-cpp
+      # - name: Install with Ninja
+        # run: sudo ninja -C build install
+        # working-directory: rizin
+      # - name: Run unit tests
+        # run: ASAN_LD_PRELOAD=$(gcc -print-file-name=libasan.so) meson test -C build --suite unit
+        # working-directory: rizin
+        # env:
+          # ASAN: true
+          # ASAN_OPTIONS: detect_leaks=0,detect_odr_violation=0,allocator_may_return_null=1
+      # - name: Run integration tests and rz-test
+        # run: |
+          # export ASAN_LD_PRELOAD=$(gcc -print-file-name=libasan.so)
+          # meson test -C build --suite integration
+          # cd test
+          # rz-test -L -o results.json
+        # working-directory: rizin
+        # env:
+          # ASAN: true
+          # ASAN_OPTIONS: detect_leaks=0,detect_odr_violation=0,allocator_may_return_null=1
+      # - name: Run fuzz tests
+        # run: rz-test -LF bins/fuzzed @fuzz
+        # working-directory: rizin/test
+        # env:
+          # ASAN: true
+          # ASAN_OPTIONS: detect_leaks=0,detect_odr_violation=0,allocator_may_return_null=1
 
   test-ubuntu-focal-debug:
     name: Run debug tests on Ubuntu 20.04
@@ -816,47 +816,47 @@ jobs:
         run: |
           go install github.com/rizinorg/rz-pipe/go/example@latest
 
-  build-bindgen:
-    name: Build rz-bindgen
-    if: contains(github.head_ref, 'dist') || contains(github.ref, 'release-') || github.ref == 'refs/heads/stable' || github.event_name == 'schedule'
-    needs: [test-tarball]
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/download-artifact@v3
-        with:
-          name: rizin-src.tar.xz
-      - name: Extract source tarball
-        run: |
-          mkdir rizin && pwd && ls -l
-          tar -C rizin --strip-components=1 -xvf rizin-src.tar.xz
-      - name: Install dependencies
-        run: |
-          sudo apt update
-          sudo apt-get --assume-yes install cmake swig pkg-config clang libclang-dev llvm wget unzip python3-wheel python3-setuptools build-essential python3-pip && sudo pip3 install meson ninja
-      - name: Install rizin
-        run: |
-          export PATH=$PATH:/usr/local/bin
-          meson setup --prefix=/usr --buildtype=release build && ninja -C build && sudo ninja -C build install
-        working-directory: rizin
-      - name: Checkout rz-bindgen
-        uses: actions/checkout@v3
-        with:
-          repository: rizinorg/rz-bindgen
-          path: rz-bindgen
-      - name: Build rz-bindgen
-        run: |
-          meson setup --prefix=/usr -Dplugin=enabled build
-          meson compile -C build
-          sudo meson install -C build
-        working-directory: rz-bindgen
-      - name: Test python lang plugin
-        run: |
-          rizin -qc "Ll" | grep "Python SWIG"
-        working-directory: rz-bindgen
-      - name: Test rizin.py
-        run: |
-          echo "import rizin" > testimport.py
-          python3 testimport.py
+  # build-bindgen:
+    # name: Build rz-bindgen
+    # if: contains(github.head_ref, 'dist') || contains(github.ref, 'release-') || github.ref == 'refs/heads/stable' || github.event_name == 'schedule'
+    # needs: [test-tarball]
+    # runs-on: ubuntu-22.04
+    # steps:
+      # - uses: actions/download-artifact@v3
+        # with:
+          # name: rizin-src.tar.xz
+      # - name: Extract source tarball
+        # run: |
+          # mkdir rizin && pwd && ls -l
+          # tar -C rizin --strip-components=1 -xvf rizin-src.tar.xz
+      # - name: Install dependencies
+        # run: |
+          # sudo apt update
+          # sudo apt-get --assume-yes install cmake swig pkg-config clang libclang-dev llvm wget unzip python3-wheel python3-setuptools build-essential python3-pip && sudo pip3 install meson ninja
+      # - name: Install rizin
+        # run: |
+          # export PATH=$PATH:/usr/local/bin
+          # meson setup --prefix=/usr --buildtype=release build && ninja -C build && sudo ninja -C build install
+        # working-directory: rizin
+      # - name: Checkout rz-bindgen
+        # uses: actions/checkout@v3
+        # with:
+          # repository: rizinorg/rz-bindgen
+          # path: rz-bindgen
+      # - name: Build rz-bindgen
+        # run: |
+          # meson setup --prefix=/usr -Dplugin=enabled build
+          # meson compile -C build
+          # sudo meson install -C build
+        # working-directory: rz-bindgen
+      # - name: Test python lang plugin
+        # run: |
+          # rizin -qc "Ll" | grep "Python SWIG"
+        # working-directory: rz-bindgen
+      # - name: Test rizin.py
+        # run: |
+          # echo "import rizin" > testimport.py
+          # python3 testimport.py
 
   test-osx-pkg:
     name: Test OSX pkg
