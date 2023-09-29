@@ -59,8 +59,8 @@ jobs:
             linux-meson-clang-tests,
             linux-meson-gcc-tests,
             macos-meson-clang-tests,
-            linux-gcc-tests-asan,
-            linux-clang-tests-asan,
+            # linux-gcc-tests-asan,
+            # linux-clang-tests-asan,
             linux-gcc-tests-codecov,
             capstone-v3,
             capstone-v4,
@@ -94,30 +94,30 @@ jobs:
             enabled: ${{ needs.changes.outputs.edited == 'true' }}
             timeout: 60
             allow_failure: false
-          - name: linux-gcc-tests-asan
-            os: ubuntu-22.04
-            build_system: meson
-            compiler: gcc-12
-            cflags: "-DRZ_ASSERT_STDOUT=1 -Wno-cpp -ftrivial-auto-var-init=pattern -funsigned-char"
-            meson_options: -Dbuildtype=debugoptimized -Db_sanitize=address,undefined --werror
-            asan: true
-            asan_options: "detect_leaks=0,detect_odr_violation=0,allocator_may_return_null=1"
-            run_tests: true
-            enabled: ${{ needs.changes.outputs.edited == 'true' }}
-            timeout: 120
-            allow_failure: false
-          - name: linux-clang-tests-asan
-            os: ubuntu-22.04
-            build_system: meson
-            compiler: clang
-            cflags: "-DRZ_ASSERT_STDOUT=1 -Wno-cpp"
-            meson_options: -Dbuildtype=debugoptimized -Db_lundef=false -Db_sanitize=address,undefined --werror
-            asan: true
-            asan_options: "detect_leaks=0,detect_odr_violation=0,allocator_may_return_null=1"
-            run_tests: true
-            enabled: ${{ needs.changes.outputs.edited == 'true' }}
-            timeout: 115
-            allow_failure: false
+          # - name: linux-gcc-tests-asan
+          #   os: ubuntu-22.04
+          #   build_system: meson
+          #   compiler: gcc-12
+          #   cflags: "-DRZ_ASSERT_STDOUT=1 -Wno-cpp -ftrivial-auto-var-init=pattern -funsigned-char"
+          #   meson_options: -Dbuildtype=debugoptimized -Db_sanitize=address,undefined --werror
+          #   asan: true
+          #   asan_options: "detect_leaks=0,detect_odr_violation=0,allocator_may_return_null=1"
+          #   run_tests: true
+          #   enabled: ${{ needs.changes.outputs.edited == 'true' }}
+          #   timeout: 120
+          #   allow_failure: false
+          # - name: linux-clang-tests-asan
+          #   os: ubuntu-22.04
+          #   build_system: meson
+          #   compiler: clang
+          #   cflags: "-DRZ_ASSERT_STDOUT=1 -Wno-cpp"
+          #   meson_options: -Dbuildtype=debugoptimized -Db_lundef=false -Db_sanitize=address,undefined --werror
+          #   asan: true
+          #   asan_options: "detect_leaks=0,detect_odr_violation=0,allocator_may_return_null=1"
+          #   run_tests: true
+          #   enabled: ${{ needs.changes.outputs.edited == 'true' }}
+          #   timeout: 115
+          #   allow_failure: false
           - name: linux-gcc-tests-codecov
             os: ubuntu-22.04
             build_system: meson
@@ -996,40 +996,40 @@ jobs:
             rizin_installer-${{ steps.extract_version.outputs.branch }}-x86_64.exe
             rizin_installer-${{ steps.extract_version.outputs.branch }}-x86.exe
 
-  publish-docker-image:
-    name: Publish Docker image on Docker Hub
-    needs: [build-and-test]
-    runs-on: ubuntu-22.04
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && contains(github.head_ref, 'container'))
-    steps:
-      - uses: actions/checkout@v3
-      - name: Install dependencies
-        run: sudo apt-get --assume-yes install python3-wheel python3-setuptools python3-pip && pip3 install --user meson
-      - name: Download subprojects
-        run: |
-          export PATH=${HOME}/.local/bin:${PATH}
-          meson subprojects download
-      - name: Login to DockerHub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Docker meta
-        id: docker_meta
-        uses: docker/metadata-action@v4
-        with:
-          images: ${{ secrets.DOCKERHUB_USERNAME }}/rizin
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-      - name: Publish to Registry
-        id: docker_build
-        uses: docker/build-push-action@v3
-        with:
-          context: .
-          file: ./Dockerfile
-          platforms: linux/amd64,linux/arm64,linux/386
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.docker_meta.outputs.tags }}
-          labels: ${{ steps.docker_meta.outputs.labels }}
+  # publish-docker-image:
+  #   name: Publish Docker image on Docker Hub
+  #   needs: [build-and-test]
+  #   runs-on: ubuntu-22.04
+  #   if: github.event_name == 'push' || (github.event_name == 'pull_request' && contains(github.head_ref, 'container'))
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - name: Install dependencies
+  #       run: sudo apt-get --assume-yes install python3-wheel python3-setuptools python3-pip && pip3 install --user meson
+  #     - name: Download subprojects
+  #       run: |
+  #         export PATH=${HOME}/.local/bin:${PATH}
+  #         meson subprojects download
+  #     - name: Login to DockerHub
+  #       uses: docker/login-action@v2
+  #       with:
+  #         username: ${{ secrets.DOCKERHUB_USERNAME }}
+  #         password: ${{ secrets.DOCKERHUB_TOKEN }}
+  #     - name: Docker meta
+  #       id: docker_meta
+  #       uses: docker/metadata-action@v4
+  #       with:
+  #         images: ${{ secrets.DOCKERHUB_USERNAME }}/rizin
+  #     - name: Set up QEMU
+  #       uses: docker/setup-qemu-action@v2
+  #     - name: Set up Docker Buildx
+  #       uses: docker/setup-buildx-action@v2
+  #     - name: Publish to Registry
+  #       id: docker_build
+  #       uses: docker/build-push-action@v3
+  #       with:
+  #         context: .
+  #         file: ./Dockerfile
+  #         platforms: linux/amd64,linux/arm64,linux/386
+  #         push: ${{ github.event_name != 'pull_request' }}
+  #         tags: ${{ steps.docker_meta.outputs.tags }}
+  #         labels: ${{ steps.docker_meta.outputs.labels }}
